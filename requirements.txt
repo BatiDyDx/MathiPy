@@ -1,5 +1,7 @@
 appnope==0.1.2
 backcall==0.2.0
+colorama==0.4.4
+commonmark==0.9.1
 cycler==0.10.0
 decorator==4.4.2
 ipykernel==5.4.2
@@ -21,9 +23,11 @@ Pygments==2.7.3
 pyparsing==2.4.7
 python-dateutil==2.8.1
 pyzmq==20.0.0
+rich==9.5.1
 scipy==1.5.4
 simpy==4.0.1
 six==1.15.0
 tornado==6.1
 traitlets==5.0.5
+typing-extensions==3.7.4.3
 wcwidth==0.2.5
