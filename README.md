@@ -1,2 +1,2 @@
 # maths-tools-python
-Tools for working mathematical functions and formulaes with Python.
+Library with tools for working with mathematical functions and formulaes with Python. 

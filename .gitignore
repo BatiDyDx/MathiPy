@@ -1,4 +1,13 @@
 .vscode
+#Virtual Enviroment files
 venv
-.DS_Store
 __pycache__
+#Mac files
+.DS_Store
+#Latex files
+latex.aux
+latex.fdb_latexmk
+latex.fls
+latex.log
+latex.synctex.gz
+latex.tex
