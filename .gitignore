@@ -2,6 +2,10 @@
 #Virtual Enviroment files
 venv
 __pycache__
+#Temporal
+setup.py
+#Test files
+test.*
 #Mac files
 .DS_Store
 #Latex files
