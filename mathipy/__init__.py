@@ -7,7 +7,27 @@ from mathipy import (
     linalg,
     polynomial,
     statistics,
-    version,
+)
+from mathipy.arithmetic import e, pi, tau, sqrt2
+from mathipy._complex import Complex
+from mathipy._math import (
+    abs,
+    gcd,
+    mcm,
+    sin, 
+    cos, 
+    tan, 
+    log, 
+    ln,
+    sqrt,
+    root_n,
+    min,
+    max,
+    mean,
+    probability_of,
+    summation,
+    product,
+    factorial,
 )
 
 __all__ = [
@@ -19,5 +39,4 @@ __all__ = [
     'linalg',
     'polynomial',
     'statistics',
-    'version',
     ]

@@ -1,5 +1,5 @@
 from mathipy import calculus, _math
-from mathipy._complex import Complex
+from mathipy import _complex
 
 class NRoot(calculus.Function):
     function_type = 'N-Root'
@@ -16,12 +16,14 @@ class NRoot(calculus.Function):
     @staticmethod
     def root(arg, index = 2, return_complex = True):
         if _math.is_iter(arg):
-            return np.array([NRoot.root(i, index, return_complex) for i in arg])
+            return np.array(list(map(NRoot.root, arg)))
+        if isinstance(arg, complex):
+            return arg ** (1 / index)
         if arg >= 0:
             return arg ** (1/index)
         else:
             if index % 2 == 0:
-                return Complex(0, NRoot.root(-arg)) if return_complex else None
+                return _complex.Complex(0, NRoot.root(-arg)) if return_complex else None
             else:
                 return - NRoot.root(-arg, index)
 
@@ -40,7 +42,7 @@ class NRoot(calculus.Function):
             y = f(x)
         except TypeError:
             if _math.is_iter(x):
-                return [self.calculate_values(i) for i in x]
+                return list(map(self.calculate_values, x))
             else: return None
         else:
             return y

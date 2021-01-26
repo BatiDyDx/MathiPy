@@ -1,4 +1,4 @@
-from mathipy import calculus, _math
+from mathipy import calculus, _math, _complex
 import numpy as np
 
 class Log(calculus.Function):
@@ -27,28 +27,35 @@ class Log(calculus.Function):
         return root
 
     @staticmethod
-    def ln(arg):
-        if arg <= 0:
+    def ln(x):
+        if isinstance(x, _complex.Complex):
+            return _complex.Complex(Log.ln(x.r), x.theta)
+        elif isinstance(x, complex):
+            return Log.ln(_complex.Complex(x.real, x.imag))
+        if x <= 0:
             raise ValueError('Argument must be positive')
         else:
-            return np.log(arg)
+            return 2 * np.arctanh((x - 1)/(x + 1))
 
     @staticmethod
-    def log(arg, base = 10):
-        if arg <= 0:
+    def log(x, base = 10):
+        if isinstance(x, _complex.Complex):
+            return _complex.Complex(Log.ln(x.r), x.theta) / Log.ln(base)
+        elif isinstance(x, complex):
+            return Log.log(_complex.Complex(x.real, x.imag), base= base) 
+        if x <= 0:
             raise ValueError('Argument must be positive')
         elif base <= 1:
             raise ValueError('Base must be greater than 1')
         if base == np.e:
-            return Log.ln(arg)
+            return Log.ln(x)
         else:
-            log_n = np.log(arg) / np.log(base)
-            log_n = _math.round_int(log_n)
-            return log_n
+            log_n = Log.ln(x) / Log.ln(base)
+            return _math.round_int(log_n)
 
     def calculate_values(self,x):
         if _math.is_iter(x):
-            return [self.calculate_values(i) for i in x]
+            return list(map(self.calculate_values, x))
         else:
             try:
                 return self.__n * Log.log(self.__k * x + self.__a, base = self.__b) + self.__c

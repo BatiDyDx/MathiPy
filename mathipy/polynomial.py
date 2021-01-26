@@ -1,6 +1,6 @@
 import re
 from mathipy import calculus
-from mathipy._complex import Complex
+from mathipy import _complex
 from mathipy import _math
 
 class Polynomial(calculus.Function):
@@ -15,7 +15,7 @@ class Polynomial(calculus.Function):
 
         domain = 'Complex'
         for i in values:
-            if isinstance(i[1], (complex, Complex)):
+            if isinstance(i[1], (complex)):
                 break
         else:
             domain = 'Real'

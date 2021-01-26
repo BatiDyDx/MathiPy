@@ -1,6 +1,6 @@
 from mathipy import calculus
 from mathipy import polynomial
-from mathipy._complex import Complex
+from mathipy import _complex 
 
 class Quadratic(polynomial.Polynomial):
     function_type = 'Quadratic'
@@ -56,8 +56,8 @@ class Quadratic(polynomial.Polynomial):
             x1_real = x2_real = - b / (2 * a)
             x1_imag = np.sqrt(abs(root_body)) / (2 * a)
             x2_imag = - np.sqrt(abs(root_body)) / (2 * a)
-            x1 = Complex(x1_real, x1_imag)
-            x2 = Complex(x2_real, x2_imag)
+            x1 = _complex.Complex(x1_real, x1_imag)
+            x2 = _complex.Complex(x2_real, x2_imag)
 
         elif root_body > 0:
             x1 = (-b + np.sqrt(root_body)) / (2 * a)
@@ -72,7 +72,7 @@ class Quadratic(polynomial.Polynomial):
     def plot_func(self, ax):
         vertex = self.__xv, self.__yv
         roots = self.__x1, self.__x2
-        if not isinstance(roots[0], Complex):
+        if not isinstance(roots[0], _complex.Complex):
             ax.scatter(roots, (0,0), c = calculus.Function.function_part['roots'])
         ax.scatter(*vertex, c = calculus.Function.function_part['vertex'])
         ax.scatter(0, self.__c, c = calculus.Function.function_part['y-intercept'])

@@ -1,7 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mathipy import _math
+from mathipy import arithmetic as artc
 
-class Complex(complex):
+class Complex(object):
+    __class__ = complex
     def __init__(self, x, y, coordinate = 'Cartesian'):
         if coordinate == 'Cartesian':
             self.a = x
@@ -12,13 +15,21 @@ class Complex(complex):
             self.r = x
             self.theta = y
             a = self.r * np.cos(self.theta)
-            self.a = round_int(a)
+            self.a = _math.round_int(a)
             b = self.r * np.sin(self.theta)
-            self.b = round_int(b)
+            self.b = _math.round_int(b)
 
         self.__cartesian_representation = f'({self.a} + {self.b}i)'
         self.__polar_representation = f'{self.r} * e^i({self.theta})'
 
+    @property
+    def real(self):
+        return self.a
+
+    @property
+    def imag(self):
+        return self.b
+        
     def __add__(z, w):
         z_real, z_imag = z.split()
     
@@ -29,9 +40,9 @@ class Complex(complex):
         else:
             w_real, w_imag = w.split()
             real_part = z_real + w_real
-            real_part = round_int(real_part)
+            real_part = _math.round_int(real_part)
             imag_part = z_imag + w_imag
-            imag_part = round_int(imag_part)
+            imag_part = _math.round_int(imag_part)
             return Complex(real_part, imag_part)
 
     def __radd__(z, w):
@@ -53,9 +64,9 @@ class Complex(complex):
             w_real, w_imag = w.split()
 
         real_part = (z_real * w_real) - (z_imag * w_imag)
-        real_part = round_int(real_part)
+        real_part = _math.round_int(real_part)
         imag_part = (z_real * w_imag) + (z_imag * w_real)
-        imag_part = round_int(imag_part)
+        imag_part = _math.round_int(imag_part)
         return Complex(real_part, imag_part)
 
     def __rmul__(z, w):
@@ -63,7 +74,7 @@ class Complex(complex):
 
     def __truediv__(z, w):
         if isinstance(w, (int, float)):
-            return Complex(z_real / w, z_imag / w)  
+            return Complex(z.a / w, z.b / w)  
         elif isinstance(w, complex):
             return z * (1 / w)
         elif isinstance(w, Complex):
@@ -76,7 +87,7 @@ class Complex(complex):
 
     def __floordiv__(z, w):
         if isinstance(w, (int, float)):
-            return Complex(z_real // w, z_imag // w)  
+            return Complex(z.a // w, z.b // w)  
         elif isinstance(w, complex):
             result = z * (1 / w)
             result.a, result.b = int(result.a), int(result.b)
@@ -89,20 +100,27 @@ class Complex(complex):
             raise TypeError(f'{type(w)} does not support Complex floor division')
 
     def __pow__(z, exp):
+        if isinstance(exp, complex):
+            return artc.e ** (exp * _math.ln(z))
         if exp == 1:
             return z
         elif exp > 1:
             return z * (z ** (exp - 1))
+        elif exp < 0:
+            return z.inverse() ** -exp
         elif exp == 0:
             return 1
-        else:
-            return z.inverse() ** (-exp) 
+        elif 0 < exp < 1:
+            return z.root(1 / exp)
 
     def __rpow__(z, a):
-        r = round_int(np.cos(np.log(a) * z.b))
-        i = round_int(np.sin(np.log(a) * z.b))
-        w = Complex(r, i)
-        return (a ** z.a) * w
+        if isinstance(a, complex):
+            return artc.e ** (z * _math.ln(a))
+        else:
+            x = _math.round_int(np.cos(np.log(a) * z.b))
+            y = _math.round_int(np.sin(np.log(a) * z.b))
+            w = Complex(x, y)
+            return (a ** z.a) * w
 
     def __neg__(z):
         real_part, imag_part = z.split()
@@ -110,22 +128,25 @@ class Complex(complex):
 
     def __eq__(z, w):
         z_real, z_imag = z.split()
-        if isinstance(w, Complex):
-            w_real, w_imag = w.split()
-        elif isinstance(w, complex):
-            w_real, w_imag = w.real, w.imag
-        elif isinstance(w, bool):
-            return bool(z) == w
-        elif isinstance(w, (int, float)):
+        if isinstance(w, (int, float)):
             if z_real == w and z_imag == 0:
                 return True
             else:
                 return False
-
-        if (z_real == w_real) and (z_imag == w_imag):
-            return True
+        elif isinstance(w, bool):
+            return bool(z) == w
         else:
-            return False
+            w_real, w_imag = w.real, w.imag
+            if (z_real == w_real) and (z_imag == w_imag):
+                return True
+            else:
+                return False
+
+    def __int__(self):
+        return int(self.a)
+
+    def __float__(self):
+        return float(self.a)
 
     def __complex__(self):
         return self.a + self.b*1j
@@ -154,11 +175,22 @@ class Complex(complex):
     def split(self):
         return self.a, self.b
 
+    def root(self, exp: float, all_roots = False):
+        r = self.r ** (1 / exp)
+        theta_n = tuple((self.theta + artc.tau * k) / exp for k in range(round(exp)))
+        if all_roots:
+            roots = []
+            for theta in theta_n:
+                roots.append(Complex(r, theta, coordinate='Polar'))
+            return roots
+        else:
+            return Complex(r, theta_n[0], coordinate='Polar')
+
     def conjugate(self):
         real_part = self.a
-        real_part = round_int(real_part)
+        real_part = _math.round_int(real_part)
         imag_part = - self.b
-        imag_part = round_int(imag_part)
+        imag_part = _math.round_int(imag_part)
         return Complex(real_part, imag_part)
 
     def inverse(self):
@@ -166,9 +198,9 @@ class Complex(complex):
 
         denominator = (self.a)**2 + (self.b)**2
         real_part = self.a/denominator
-        real_part = round_int(real_part)
+        real_part = _math.round_int(real_part)
         imag_part = - self.b/denominator
-        imag_part = round_int(imag_part)
+        imag_part = _math.round_int(imag_part)
 
         return Complex(real_part, imag_part)
 

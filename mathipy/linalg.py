@@ -17,6 +17,10 @@ class Vector(LinearAlgebra):
         else:
             self.__field = 'R'
 
+    @property
+    def module(self):
+        return self.__magnitude
+
     def __add__(v, u):
         if v.__dimension == u.__dimension:
             i = zip(v.__elements, u.__elements)
