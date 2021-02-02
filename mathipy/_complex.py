@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mathipy import _math
-from mathipy import arithmetic as artc
+from mathipy import arithmetic as arm
+from mathipy import linalg
 
 class Complex(object):
     __class__ = complex
@@ -60,6 +61,8 @@ class Complex(object):
             return Complex(z_real * w, z_imag * w)  
         elif isinstance(w, complex):
             w_real, w_imag = w.real, w.imag
+        elif isinstance(w, linalg.Tensor):
+            return w.__rmul__(z)
         else:
             w_real, w_imag = w.split()
 
@@ -101,7 +104,7 @@ class Complex(object):
 
     def __pow__(z, exp):
         if isinstance(exp, complex):
-            return artc.e ** (exp * _math.ln(z))
+            return arm.e ** (exp * _math.ln(z))
         if exp == 1:
             return z
         elif exp > 1:
@@ -115,10 +118,10 @@ class Complex(object):
 
     def __rpow__(z, a):
         if isinstance(a, complex):
-            return artc.e ** (z * _math.ln(a))
+            return arm.e ** (z * _math.ln(a))
         else:
-            x = _math.round_int(np.cos(np.log(a) * z.b))
-            y = _math.round_int(np.sin(np.log(a) * z.b))
+            x = _math.round_int(_math.cos(_math.ln(a) * z.b))
+            y = _math.round_int(_math.sin(_math.ln(a) * z.b))
             w = Complex(x, y)
             return (a ** z.a) * w
 
@@ -177,7 +180,7 @@ class Complex(object):
 
     def root(self, exp: float, all_roots = False):
         r = self.r ** (1 / exp)
-        theta_n = tuple((self.theta + artc.tau * k) / exp for k in range(round(exp)))
+        theta_n = tuple((self.theta + arm.tau * k) / exp for k in range(round(exp)))
         if all_roots:
             roots = []
             for theta in theta_n:

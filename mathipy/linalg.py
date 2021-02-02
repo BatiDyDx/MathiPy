@@ -1,15 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from mathipy import _complex
+from mathipy import _math
 
-class LinearAlgebra():
+class Tensor():
     pass
 
-class Vector(LinearAlgebra):
+class Vector(Tensor):
+    rank = 1
     def __init__(self, *args):
         self.__elements = [x for x in args]
         self.__dimension = len(self.__elements)
-        self.__magnitude = np.sqrt(sum(map(lambda v: v**2, self.__elements)))
+        self.__magnitude = _math.sqrt(sum(map(lambda v: v**2, self.__elements)))
         self.__field = 'C'
         for e in self.__elements:
             if isinstance(e, complex):
@@ -62,9 +64,12 @@ class Vector(LinearAlgebra):
                     cross_product += v_el * u_el
                 return cross_product
     
-        elif isinstance(u, (int, float, complex, _complex.Complex)):
+        elif _math.is_scalar(u):
             scaled_v = map(lambda val: val * u, v.__elements)
             return Vector(*scaled_v)
+
+        elif isinstance(u, Matrix):
+            return u.__rmul__(v)
 
     def inner_product(v, u):
         u_prime = Vector(*[i.conjugate() for i in u])
@@ -82,6 +87,9 @@ class Vector(LinearAlgebra):
 
     def transpose(self):
         return Matrix(self.__elements)
+
+    def to_matrix(self):
+        return Matrix(*[[n] for n in self.__elements])
 
     def plot(self):
         if self.__dimension != 2:
@@ -127,7 +135,8 @@ class Vector(LinearAlgebra):
     def __repr__(self):
         return f'Vector({self.__elements})'
 
-class Matrix(LinearAlgebra):
+class Matrix(Tensor):
+    rank = 2
     def __init__(self, *args):
         self.__elements = list(args)
         self.m_dimension = len(self.__elements)
@@ -143,11 +152,14 @@ class Matrix(LinearAlgebra):
             while len(self.__elements[i]) < n_dim:
                 self.__elements[i].append(0)
 
-    def __add__(A, B):
-        if A.shape == B.shape:
-            pass
-        else:
-            raise ValueError(f'Matrices can only be summed if they have same shape, received {A.shape} and {B.shape}')
+    @property
+    def t(self):
+        return self.transpose()
+
+    @staticmethod
+    def zeros_matrix(m, n):
+        elements = [[0] * n for _ in range(m)]
+        return Matrix(*elements)
 
     @staticmethod
     def identity(size):
@@ -166,6 +178,65 @@ class Matrix(LinearAlgebra):
             t_rows.append(self[:, i])
         return Matrix(*t_rows)
 
+    def inverse(self):
+        pass
+
+    def __add__(A, B):
+        if A.shape == B.shape:
+            C = Matrix.zeros_matrix(*A.shape)
+            for m in range(C.m_dimension):
+                for n in range(C.n_dimension):
+                    C[m, n] = A[m][n] + B[m][n]
+            return C
+        else:
+            raise ValueError(f'Matrices can only be summed if they have same shape, received {A.shape} and {B.shape}')
+
+    def __sub__(A, B):
+        return A + (-B)
+
+    def __neg__(A):
+        return -1 * A
+    
+    def __mul__(A, B):
+        if isinstance(B, Tensor):
+            if isinstance(B, Vector):
+                return A * B.to_matrix()
+            elif A.n_dimension == B.m_dimension:
+                C = Matrix.zeros_matrix(A.m_dimension, B.n_dimension)
+                for i in range(A.m_dimension):
+                    for j in range(B.n_dimension):
+                        v = Vector(*A[i])
+                        u = Vector(*B[:, j])
+                        C[i, j] = v * u
+                return C
+            else:
+                raise ValueError(
+            f"First matrix n-dimension must be equal to second matrix m-dimension. Received {A.n_dimension} and {B.m_dimension}"
+            )
+        elif _math.is_scalar(B):
+            C = Matrix.zeros_matrix(*A.shape)
+            for m in range(A.m_dimension):
+                for n in range(A.n_dimension):
+                    C[m, n] = (A[m][n] * B)
+            return C
+
+    def __rmul__(A, B):
+        if _math.is_scalar(B):
+            return A * B
+        elif isinstance(B, Vector):
+            return B.to_matrix() * A
+
+    def __pow__(self, n):
+        if not isinstance(n, int):
+            raise ValueError('Exponent must be an integer')
+        if n == 1 or n == 0:
+            return self
+        elif n > 1:
+            return self * self ** (n - 1)
+        else:
+            return self.inverse() ** (-n)
+
+
     def __iter__(self):
         elements_list = []
         for i in self.__elements:
@@ -179,9 +250,13 @@ class Matrix(LinearAlgebra):
         else:
             return self.__elements[index]
 
+    def __setitem__(self, index, value):
+        m, n = index
+        self.__elements[m][n] = value
+
     def __repr__(self):
         expression = 'Matrix('
         for row in self.__elements:
             expression += '\n    ' + str(row)
-        expression += ')'
+        expression += ') \n'
         return expression

@@ -51,6 +51,9 @@ def is_iter(a, exclude = None) -> bool:
             types = tuple(t for t in types if t != exclude)
     return isinstance(a, types)
 
+def is_scalar(a):
+    return isinstance(a, (int, float, complex, _complex.Complex))
+
 def abs(n):
     if isinstance(n, _complex.Complex):
         return n.r
@@ -154,19 +157,21 @@ def probability_of(x, iterable):
     return stats.Statistics(iterable)(x)
 
 def sin(x):
-    y = (arithmetic.e ** (_complex.Complex(0,1) * x) - arithmetic.e ** (_complex.Complex(0,-1) * x))
-    y /= _complex.Complex(0,1) * 2
-    if y.b != 0:
+    y = (arithmetic.e ** (1j * x) - arithmetic.e ** (-1j * x))
+    y /=  2j
+    y = round_int(y)
+    if y.imag != 0:
         return y
     else:
-        return float(y)
+        return y.real
 
 def cos(x):
-    y = ((arithmetic.e ** (_complex.Complex(0,1) * x) + arithmetic.e ** (_complex.Complex(0,-1) * x))) / 2
-    if y.b != 0:
+    y = ((arithmetic.e ** (1j * x) + arithmetic.e ** (-1j * x))) / 2
+    y = round_int(y)
+    if y.imag != 0:
         return y
     else:
-        return float(y)
+        return y.real
 
 def tan(x):
     return (sin(x) / cos(x))

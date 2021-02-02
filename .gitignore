@@ -3,9 +3,9 @@
 venv
 __pycache__
 #Temporal
-setup.py
+#setup.py
 #Test files
-#test.*
+test.*
 #Mac files
 .DS_Store
 #Latex files
