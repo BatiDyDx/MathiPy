@@ -7,8 +7,8 @@ class NormalDistribution(calculus.Function):
         self.sigma = sigma
 
     def calculate_values(self, x):
-        y = 1 / np.sqrt(2 * np.pi * self.sigma)
-        y *= np.e ** (-((x - self.mu)**2) / (2 * self.sigma ** 2))
+        y = 1 / _math.sqrt(_math.tau * self.sigma)
+        y *= _math.e ** (-((x - self.mu)**2) / (2 * self.sigma ** 2))
         return y
 
     def plot_func(self, ax):

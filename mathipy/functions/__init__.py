@@ -1,6 +1,7 @@
 from mathipy.functions import (
     abs_value,
     binomial_dist,
+    complex_function,
     exponential,
     linear,
     logarithmic,
@@ -14,6 +15,7 @@ from mathipy.functions import (
 __all__ = [
     'abs_value',
     'binomial_dist',
+    'complex_function',
     'exponential',
     'linear',
     'log',

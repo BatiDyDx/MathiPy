@@ -8,15 +8,18 @@ from mathipy import (
     polynomial,
     statistics,
 )
-from mathipy.arithmetic import e, pi, tau, sqrt2
-from mathipy._complex import Complex
-from mathipy._math import (
+from .arithmetic import Undefined, Infinite, e, pi, tau, sqrt2
+from ._complex import Complex
+from ._math import (
     abs,
     gcd,
     mcm,
     sin, 
     cos, 
-    tan, 
+    tan,
+    sinh,
+    cosh,
+    tanh, 
     log, 
     ln,
     sqrt,

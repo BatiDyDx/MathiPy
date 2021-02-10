@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from mathipy import _math
 from mathipy import arithmetic as arm
 from mathipy import linalg
+from fractions import Fraction
 
 class Complex(object):
     __class__ = complex
@@ -10,18 +11,15 @@ class Complex(object):
         if coordinate == 'Cartesian':
             self.a = x
             self.b = y
-            self.r = np.sqrt(self.a**2 + self.b**2)
+            self.r = _math.sqrt(self.a**2 + self.b**2)
             self.theta = self.phase()
         elif coordinate == 'Polar':
             self.r = x
             self.theta = y
-            a = self.r * np.cos(self.theta)
+            a = self.r * _math.cos(self.theta)
             self.a = _math.round_int(a)
-            b = self.r * np.sin(self.theta)
+            b = self.r * _math.sin(self.theta)
             self.b = _math.round_int(b)
-
-        self.__cartesian_representation = f'({self.a} + {self.b}i)'
-        self.__polar_representation = f'{self.r} * e^i({self.theta})'
 
     @property
     def real(self):
@@ -30,19 +28,22 @@ class Complex(object):
     @property
     def imag(self):
         return self.b
-        
+
+    @property
+    def mod(self):
+        return self.r
+
+    @property
+    def arg(self):
+        return self.theta
+
     def __add__(z, w):
-        z_real, z_imag = z.split()
-    
         if isinstance(w, (int, float)):
-            return Complex(z_real + w, z_imag)  
-        elif isinstance(w, complex):
-            return Complex(z_real + w.real, z_imag + w.imag)
+            return Complex(z.real + w, z.imag)  
         else:
-            w_real, w_imag = w.split()
-            real_part = z_real + w_real
+            real_part = z.real + w.real
             real_part = _math.round_int(real_part)
-            imag_part = z_imag + w_imag
+            imag_part = z.imag + w.imag
             imag_part = _math.round_int(imag_part)
             return Complex(real_part, imag_part)
 
@@ -56,19 +57,14 @@ class Complex(object):
         return w + (-z)
 
     def __mul__(z, w):
-        z_real, z_imag = z.split()
         if isinstance(w, (int, float)):
-            return Complex(z_real * w, z_imag * w)  
-        elif isinstance(w, complex):
-            w_real, w_imag = w.real, w.imag
+            return Complex(z.real * w, z.imag * w)  
         elif isinstance(w, linalg.Tensor):
             return w.__rmul__(z)
-        else:
-            w_real, w_imag = w.split()
 
-        real_part = (z_real * w_real) - (z_imag * w_imag)
+        real_part = (z.real * w.real) - (z.imag * w.imag)
         real_part = _math.round_int(real_part)
-        imag_part = (z_real * w_imag) + (z_imag * w_real)
+        imag_part = (z.real * w.imag) + (z.imag * w.real)
         imag_part = _math.round_int(imag_part)
         return Complex(real_part, imag_part)
 
@@ -104,7 +100,7 @@ class Complex(object):
 
     def __pow__(z, exp):
         if isinstance(exp, complex):
-            return arm.e ** (exp * _math.ln(z))
+            return _math.e ** (exp * _math.ln(z))
         if exp == 1:
             return z
         elif exp > 1:
@@ -114,11 +110,13 @@ class Complex(object):
         elif exp == 0:
             return 1
         elif 0 < exp < 1:
-            return z.root(1 / exp)
+            exp_frac = str(Fraction(exp).limit_denominator())
+            frac_numerator, frac_denominator = exp_frac.split('/')
+            return z.root(int(frac_denominator)) ** int(frac_numerator)
 
     def __rpow__(z, a):
         if isinstance(a, complex):
-            return arm.e ** (z * _math.ln(a))
+            return _math.e ** (z * _math.ln(a))
         else:
             x = _math.round_int(_math.cos(_math.ln(a) * z.b))
             y = _math.round_int(_math.sin(_math.ln(a) * z.b))
@@ -126,21 +124,18 @@ class Complex(object):
             return (a ** z.a) * w
 
     def __neg__(z):
-        real_part, imag_part = z.split()
-        return Complex(-real_part, -imag_part)
+        return Complex(-z.real, -z.imag)
 
     def __eq__(z, w):
-        z_real, z_imag = z.split()
         if isinstance(w, (int, float)):
-            if z_real == w and z_imag == 0:
+            if z.real == w and z.imag == 0:
                 return True
             else:
                 return False
         elif isinstance(w, bool):
             return bool(z) == w
         else:
-            w_real, w_imag = w.real, w.imag
-            if (z_real == w_real) and (z_imag == w_imag):
+            if (z.real == w.real) and (z.imag == w.imag):
                 return True
             else:
                 return False
@@ -178,23 +173,21 @@ class Complex(object):
     def split(self):
         return self.a, self.b
 
-    def root(self, exp: float, all_roots = False):
-        r = self.r ** (1 / exp)
-        theta_n = tuple((self.theta + arm.tau * k) / exp for k in range(round(exp)))
+    def root(self, n: int, all_roots = False):
+        r = self.r ** (1 / n)
         if all_roots:
+            #return Complex.unit_circle_roots(self.mod, )
             roots = []
+            theta_n = tuple((self.theta + _math.tau * k) / n for k in range(n))
             for theta in theta_n:
                 roots.append(Complex(r, theta, coordinate='Polar'))
             return roots
         else:
-            return Complex(r, theta_n[0], coordinate='Polar')
+            theta = self.theta / n
+            return Complex(r, theta, coordinate='Polar')
 
     def conjugate(self):
-        real_part = self.a
-        real_part = _math.round_int(real_part)
-        imag_part = - self.b
-        imag_part = _math.round_int(imag_part)
-        return Complex(real_part, imag_part)
+        return Complex(self.real, -self.imag)
 
     def inverse(self):
         real_denominator, imag_denominator = self.split() 
@@ -207,18 +200,22 @@ class Complex(object):
 
         return Complex(real_part, imag_part)
 
-    def plot(self):
+    def plot(self, coordinate='cartesian'):
         angle = np.linspace(0, self.theta, 100)
-        x = self.r * np.cos(angle) / 5
-        y = self.r * np.sin(angle) / 5
+        x = self.r * _math.cos(angle) / 5
+        y = self.r * _math.sin(angle) / 5
         a, b = self.split()
-        fig, ax = plt.subplots()
+        fig = plt.figure()
+        #TODO
+        #POLAR REPRESENTATION
+        p = 'rectilinear' if coordinate == 'cartesian' else 'polar'
+        ax = fig.add_subplot(projection=p)
     
         ax.set_title('Complex number plot')
         plt.style.use('dark_background')
 
-        plt.ylabel('Imaginary axis')
         plt.xlabel('Real axis')
+        plt.ylabel('Imaginary axis')
         plt.grid()
 
         if abs(a) >= 1:
@@ -259,31 +256,79 @@ class Complex(object):
         elif exp % 4 == 3:
             return Complex(0,-1)
 
+    @staticmethod
+    def circle_roots(n: int, r = 1):
+        roots = []
+        w = _math.tau / n
+        for k in range(n):
+            theta = w * k
+            roots.append(Complex(r, theta, coordinate='Polar'))
+        return roots
+
+    @staticmethod
+    def to_Complex(X, Y, **kwargs):
+        c = kwargs.get('coordinate', 'Cartesian')
+        if _math.is_scalar(X) and _math.is_scalar(Y):
+            return Complex(X, Y, coordinate=c)
+        else:
+            for x,y in zip(X,Y):
+                yield Complex(x,y, coordinate=c)
+
     def phase(self):
         if self.a == 0:
             if self.b > 0:
-                return np.pi / 2
+                return _math.pi / 2
             elif self.b < 0:
-                return - np.pi / 2
+                return - _math.pi / 2
             else:
                 return None
         elif self.a < 0:
             if self.b >= 0:
-                return np.arctan(self.b / self.a) + np.pi
+                return np.arctan(self.b / self.a) + _math.pi
             else:
-                return np.arctan(self.b / self.a) - np.pi
+                return np.arctan(self.b / self.a) - _math.pi
         else:
             return np.arctan(self.b / self.a)
 
     def polar_expression(self):
-        return self.__polar_representation
-
+        return f'{self.r} * e^i({self.theta})'
+    
     def cartesian_expression(self):
-        return self.__cartesian_representation
-
+        return f'({self.a} + {self.b}i)'
+    
     def __str__(self):
         return self.cartesian_expression()
         #display(Latex(f'${self.r}  e^{{i {self.theta}}}$'))
 
     def __repr__(self):
         return str(self)
+
+def real(Z):
+    if _math.is_scalar(Z):
+        return Z.real
+    elif _math.is_iter(Z):
+        return np.array(list(map(real, Z)))
+
+def imag(Z):
+    if _math.is_scalar(Z):
+        return Z.imag
+    elif _math.is_iter(Z):
+        return np.array(list(map(imag, Z)))
+
+def module(Z):
+    if _math.is_scalar(Z):
+        try:
+            return Z.mod
+        except AttributeError:
+            return Complex(Z.real, Z.imag).mod
+    elif _math.is_iter(Z):
+        return np.array(list(map(module, Z)))
+
+def argument(Z):
+    if _math.is_scalar(Z):
+        try:
+            return Z.arg
+        except AttributeError:
+            return Complex(Z.real, Z.imag).arg
+    elif _math.is_iter(Z):
+        return np.array(list(map(argument, Z)))

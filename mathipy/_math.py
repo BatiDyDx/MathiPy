@@ -1,15 +1,11 @@
 import numpy as np
-from mathipy import arithmetic 
-from mathipy.functions import logarithmic
-from mathipy.functions import nroot
-from mathipy.functions import trigonometric
-from mathipy import _complex 
+import mathipy.functions as F
+from mathipy import _complex as C
+from mathipy import arithmetic
+from mathipy.functions import logarithmic, nroot, trigonometric
 from mathipy import statistics as stats
-from mathipy import datastr
+from mathipy import datastr, linalg
 
-def binomial(a, b, exp):
-    if isinstance(b, _complex.Complex):
-        pass
 
 def pascal_triangle(n):
     if n == 0:
@@ -29,8 +25,8 @@ def pascal_triangle(n):
 def round_int(n, thresh_exp = 3):
     floor_thresh = 1 * (10 ** -thresh_exp)
     ceil_thresh = 1 - floor_thresh
-    if isinstance(n, _complex.Complex):
-        return _complex.Complex(round_int(n.a), round_int(n.b))
+    if isinstance(n, C.Complex):
+        return C.Complex(round_int(n.a), round_int(n.b))
     elif isinstance(n, complex):
         return complex(round_int(n.real), round_int(n.imag))
     elif is_iter(n):
@@ -43,7 +39,7 @@ def round_int(n, thresh_exp = 3):
         return -round_int(-n)
 
 def is_iter(a, exclude = None) -> bool:
-    types = (tuple, list, set, np.ndarray, datastr.Queue, datastr.Stack)
+    types = (tuple, list, set, np.ndarray, datastr.Queue, datastr.Stack, linalg.Tensor)
     if exclude:
         if is_iter(a = exclude):
             types = tuple(t for t in types if t not in exclude)
@@ -52,13 +48,13 @@ def is_iter(a, exclude = None) -> bool:
     return isinstance(a, types)
 
 def is_scalar(a):
-    return isinstance(a, (int, float, complex, _complex.Complex))
+    return isinstance(a, (int, float, complex, C.Complex))
 
 def abs(n):
-    if isinstance(n, _complex.Complex):
+    if isinstance(n, C.Complex):
         return n.r
     elif isinstance(n, complex):
-        return np.sqrt((n.real)**2 + (n.imag)**2)
+        return _math.sqrt((n.real)**2 + (n.imag)**2)
     elif is_iter(n):
         return list(map(abs, n))
     else:
@@ -83,43 +79,21 @@ def factorial(n):
         return 1
     return n * factorial(n - 1)
 
-def summation(arg, upper_bound, lower_bound = 0, **kwargs):
-    var = kwargs.get('var_name', 'x')
-    if isinstance(arg, (int, float, complex, _complex.Complex)):
-        arg = arithmetic.Constant(arg)
-
-    if upper_bound < lower_bound:
+def summation(f, up_bound, low_bound = 0):
+    if up_bound < low_bound:
         return 0
-
-    if upper_bound == lower_bound:
-        if hasattr(arg, '__call__'):
-            return arg(lower_bound)
-        else:
-            return arg.evaluate({var: lower_bound})
+    elif up_bound == low_bound:
+        return f(low_bound)    
     else:
-        if hasattr(arg, '__call__'):
-            return arg(upper_bound) + summation(arg, upper_bound - 1, lower_bound)
-        else:
-            return arg.evaluate({var: upper_bound}) + summation(arg, upper_bound - 1, lower_bound, var_name = var)
+        return f(low_bound) + summation(f, up_bound, low_bound + 1)
 
-def product(arg, upper_bound, lower_bound = 1, **kwargs):
-    var = kwargs.get('var_name', 'x')
-    if isinstance(arg, (int, float, complex, _complex.Complex)):
-        arg = arithmetic.Constant(arg)
-
-    if upper_bound < lower_bound:
+def product(f, up_bound, low_bound = 1):
+    if up_bound < low_bound:
         return 0
-
-    if upper_bound == lower_bound:
-        if hasattr(arg, '__call__'):
-            return arg(lower_bound)
-        else:
-            return arg.evaluate({var: lower_bound})
+    elif up_bound == low_bound:
+        return f(low_bound)
     else:
-        if hasattr(arg, '__call__'):
-            return arg(upper_bound) * product(arg, upper_bound - 1, lower_bound)
-        else:
-            return arg.evaluate({var: upper_bound}) * product(arg, upper_bound - 1, lower_bound, var_name = var)
+        return f(low_bound) * product(f, up_bound, low_bound + 1)
 
 def gcd(a, b):
     if a % b == 0:
@@ -133,16 +107,16 @@ def mcm(a, b):
     return (a * b) // d
 
 def sqrt(x, return_complex = True):
-    return nroot.NRoot.root(x, return_complex= return_complex)
+    return F.nroot.NRoot.root(x, return_complex= return_complex)
 
 def root_n(x, n, return_complex):
-    return nroot.NRoot.root(x, index= n, return_complex= return_complex)
+    return F.nroot.NRoot.root(x, index= n, return_complex= return_complex)
 
 def log(x, base):
-    return logarithmic.Log.log(x, base=base)
+    return F.logarithmic.Log.log(x, base=base)
 
 def ln(x):
-    return logarithmic.Log.ln(x)
+    return F.logarithmic.Log.ln(x)
 
 def min(iterable):
     return stats.Statistics(iterable).min()
@@ -157,24 +131,30 @@ def probability_of(x, iterable):
     return stats.Statistics(iterable)(x)
 
 def sin(x):
-    y = (arithmetic.e ** (1j * x) - arithmetic.e ** (-1j * x))
-    y /=  2j
+    y = (_math.e ** (1j * x) - _math.e ** (-1j * x)) / 2j
     y = round_int(y)
-    if y.imag != 0:
-        return y
-    else:
+    if y.imag == 0:
         return y.real
+    else:
+        return y
 
 def cos(x):
-    y = ((arithmetic.e ** (1j * x) + arithmetic.e ** (-1j * x))) / 2
-    y = round_int(y)
-    if y.imag != 0:
-        return y
-    else:
-        return y.real
+    return sin(x - _math.pi / 2)
 
 def tan(x):
-    return (sin(x) / cos(x))
+    try:
+        return sin(x) / cos(x)
+    except ZeroDivisionError:
+        return None
+
+def sinh(x):
+    return sin(C.Complex(0,1) * x)
+
+def cosh(x):
+    return cos(C.Complex(0,1) * x)
+
+def tanh(x):
+    return sinh(x) / cosh(x)
 
 # def cosec(x):
 #     return Cosec.csc(x)

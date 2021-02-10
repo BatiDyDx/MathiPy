@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import mathipy._math as mt
 
 class Function(object):
     function_part = {
@@ -15,7 +16,10 @@ class Function(object):
         self.function = f
 
     def calculate_values(self, x):
-        return self.function(x)
+        if mt.is_scalar(x):
+            return self.function(x)
+        else:
+            return list(map(self.function, x))
 
     def __call__(self, x):
         return self.calculate_values(x)
@@ -38,7 +42,7 @@ class Function(object):
         height = kwargs.get('h', 1)
         v_scale = kwargs.get('vertical_scale', 'relative')
         if v_scale == 'relative':
-            y_min, y_max = min(y) - height, max(y) + height
+            y_min, y_max = mt.min(y) - height, mt.max(y) + height
         elif v_scale == 'absolute':
             y_min, y_max = - height / 2, height / 2
 
@@ -64,8 +68,8 @@ class Function(object):
     def integral(self):
         #TODO integral
         x1 = np.linspace(pos - 2, pos + 3, 1000)
-        y1 = self.function.calculate_values(self.function, x1)
-        ax.fill_between(x1,y1,color='red', alpha=0.5)
+        y1 = self.calculate_values(x1)
+        ax.fill_between(x1, y1, color='red', alpha=0.5)
     
     def derivative(self):
         pass

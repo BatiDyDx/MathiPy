@@ -1,5 +1,6 @@
-from mathipy import calculus, _math, _complex
 import numpy as np
+import mathipy._math as mt
+from mathipy import calculus, _complex
 
 class Log(calculus.Function):
     function_type = 'Logarithmic'
@@ -38,11 +39,15 @@ class Log(calculus.Function):
             return 2 * np.arctanh((x - 1)/(x + 1))
 
     @staticmethod
-    def log(x, base = 10):
+    def log(x, base= 10):
+        if mt.is_iter(x):
+            return list(map(lambda x: log(x, base)))
+        
         if isinstance(x, _complex.Complex):
             return _complex.Complex(Log.ln(x.r), x.theta) / Log.ln(base)
         elif isinstance(x, complex):
             return Log.log(_complex.Complex(x.real, x.imag), base= base) 
+        
         if x <= 0:
             raise ValueError('Argument must be positive')
         elif base <= 1:
@@ -51,16 +56,16 @@ class Log(calculus.Function):
             return Log.ln(x)
         else:
             log_n = Log.ln(x) / Log.ln(base)
-            return _math.round_int(log_n)
+            return mt.round_int(log_n)
 
-    def calculate_values(self,x):
-        if _math.is_iter(x):
-            return list(map(self.calculate_values, x))
-        else:
+    def calculate_values(self, x):
+        if mt.is_scalar:
             try:
-                return self.__n * Log.log(self.__k * x + self.__a, base = self.__b) + self.__c
+                return self.__n * Log.log(self.__k * x + self.__a, base= self.__b) + self.__c
             except ValueError:
                 return None
+        else:
+            return list(map(self.calculate_values, x))
 
     def plot_func(self, ax):
         if self.get_yint() != None:
@@ -94,10 +99,10 @@ class Log(calculus.Function):
         if self.__a > 0:
             representation += f' + {self.__a})'
         elif self.__a < 0:
-            representation += f' - {_math.abs(self.__a)})'
+            representation += f' - {mt.abs(self.__a)})'
         else:
             representation += ')'
         if self.__c > 0:
             representation += f' + {self.__c}'
         elif self.__c < 0:
-            representation += f' - {_math.abs(self.__c)}'
+            representation += f' - {mt.abs(self.__c)}'

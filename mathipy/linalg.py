@@ -4,12 +4,17 @@ from mathipy import _complex
 from mathipy import _math
 
 class Tensor():
+    """
+    Tensor class:
+    Vector or Matrix
+
+    """
     pass
 
 class Vector(Tensor):
     rank = 1
-    def __init__(self, *args):
-        self.__elements = [x for x in args]
+    def __init__(self, *args): 
+        self.__elements = list(args)
         self.__dimension = len(self.__elements)
         self.__magnitude = _math.sqrt(sum(map(lambda v: v**2, self.__elements)))
         self.__field = 'C'
@@ -40,6 +45,9 @@ class Vector(Tensor):
 
     def __mul__(v, u):
         return v.dot_product(u)
+
+    def __matmul__(v, u):
+        return v.tensor_product(u)
 
     def __rmul__(v, u):
         return v.dot_product(u)
@@ -94,18 +102,18 @@ class Vector(Tensor):
     def plot(self):
         if self.__dimension != 2:
             raise ValueError('Only 2-dimensional vectors can be graphed')
-    
+
         i, j = self.__elements
         #i_min, i_max = - abs(i) - 1, abs(i) + 1
         fig, ax = plt.subplots()
-    
+
         ax.set_title("Vector plot")
         plt.style.use('dark_background')
 
         plt.ylabel('$j$')
         plt.xlabel('$i$')
         plt.grid()
-    
+
         head_w = self.__magnitude / 45
         plt.arrow(0, 0, i, j, head_width = head_w, length_includes_head = True, color='r')
 
@@ -138,7 +146,7 @@ class Vector(Tensor):
 class Matrix(Tensor):
     rank = 2
     def __init__(self, *args):
-        self.__elements = list(args)
+        self.__elements = _math.round_int(list(args))
         self.m_dimension = len(self.__elements)
         self.n_dimension = max([len(row) for row in self.__elements])
         self.shape = (self.m_dimension, self.n_dimension)
@@ -156,10 +164,30 @@ class Matrix(Tensor):
     def t(self):
         return self.transpose()
 
+    @property
+    def c(self):
+        return self.cofactorial()
+
+    @property
+    def a(self):
+        return self.adjugate()
+
+    @property
+    def det(self):
+        return self.determinant()
+
+    @staticmethod
+    def k_matrix(k, m, n):
+        elements = [[k] * n for _ in range(m)] 
+        return Matrix(*elements)
+
     @staticmethod
     def zeros_matrix(m, n):
-        elements = [[0] * n for _ in range(m)]
-        return Matrix(*elements)
+        return Matrix.k_matrix(0, m, n)
+
+    @staticmethod
+    def ones_matrix(m, n):
+        return Matrix.k_matrix(1, m, n)
 
     @staticmethod
     def identity(size):
@@ -178,15 +206,65 @@ class Matrix(Tensor):
             t_rows.append(self[:, i])
         return Matrix(*t_rows)
 
+    def determinant(self):
+        if not self.is_square():
+            raise ValueError('Matrix must be square to calculate determinant')
+        else:
+            if self.shape == (2,2):
+                return (self[0][0] * self[1][1]) - (self[0][1] * self[1][0])
+            else:
+                det = 0
+                #Ignore the first row
+                A_i = self[1:]
+                #Iter over the columns of the matrix
+                for i in range(self.n_dimension):
+                    #Store the elements that do not correspond 
+                    #to the actual row or column
+                    cA_ij = []
+                    #Iter over the rows of the shortened matrix
+                    for j in range(len(A_i)):
+                        #Store the row ignoring the actual column
+                        cA_ij.append(A_i[j][0:i] + A_i[j][i+1:])
+                    #Add the determinant of cA_ij, times 
+                    #the a_ij element, fliping the sign
+                    det += (-1) ** (i%2) * Matrix(*cA_ij).determinant() * self[0][i]
+                return det
+
+    def cofactorial(self):
+        if not self.is_square():
+            raise ValueError('Matrix must be square to calculate cofactorial')
+        else:
+            A_c = Matrix.zeros_matrix(*self.shape)
+            #Iter over the rows of the matrix
+            for i in range(self.m_dimension):
+                #Ignore the actual row
+                A_i = self[0:i] + self[i+1:]
+                #Iter over the columns
+                for j in range(self.n_dimension):
+                    #Store the elements ignoring the actual row and column
+                    cA_ij = []
+                    #Iter over the shortened matrix
+                    for h in range(len(A_i)):
+                        #Add to cA_ij the elements
+                        cA_ij.append(A_i[h][0:j] + A_i[h][j+1:])
+                    det_ij = Matrix(*cA_ij).determinant()
+                    #Set the i-row and j-column equal to the determinant
+                    #of cA_ij altering its sign
+                    A_c[i, j] = (-1) ** (i + j) * det_ij
+            return A_c
+
+    def adjugate(self):
+        return self.cofactorial().t
+
     def inverse(self):
-        pass
+        return self.adjugate() * (1 / self.determinant())
 
     def __add__(A, B):
         if A.shape == B.shape:
             C = Matrix.zeros_matrix(*A.shape)
-            for m in range(C.m_dimension):
-                for n in range(C.n_dimension):
-                    C[m, n] = A[m][n] + B[m][n]
+            for i in range(C.m_dimension):
+                for j in range(C.n_dimension):
+                    C[i, j] = A[i][j] + B[i][j]
             return C
         else:
             raise ValueError(f'Matrices can only be summed if they have same shape, received {A.shape} and {B.shape}')
@@ -196,8 +274,19 @@ class Matrix(Tensor):
 
     def __neg__(A):
         return -1 * A
-    
+
     def __mul__(A, B):
+        C = Matrix.zeros_matrix(*A.shape)
+        if isinstance(B, Tensor):
+            if not A.shape == B.shape:
+                raise ValueError(f'Matrices can only be summed if they have same shape, received {A.shape} and {B.shape}')
+        for i in range(A.m_dimension):
+            for j in range(A.n_dimension):
+                C[i, j] = A[i][j] * B[i][j]
+        return C
+
+
+    def __matmul__(A, B):
         if isinstance(B, Tensor):
             if isinstance(B, Vector):
                 return A * B.to_matrix()
@@ -208,23 +297,28 @@ class Matrix(Tensor):
                         v = Vector(*A[i])
                         u = Vector(*B[:, j])
                         C[i, j] = v * u
-                return C
+                return Matrix(*C.__elements)
             else:
                 raise ValueError(
             f"First matrix n-dimension must be equal to second matrix m-dimension. Received {A.n_dimension} and {B.m_dimension}"
             )
-        elif _math.is_scalar(B):
-            C = Matrix.zeros_matrix(*A.shape)
-            for m in range(A.m_dimension):
-                for n in range(A.n_dimension):
-                    C[m, n] = (A[m][n] * B)
-            return C
+        
 
-    def __rmul__(A, B):
+    def __rmatmul__(A, B):
         if _math.is_scalar(B):
             return A * B
         elif isinstance(B, Vector):
             return B.to_matrix() * A
+
+    def __truediv__(A, B):
+        if _math.is_scalar(B):
+            return A * (1 / B)
+        else:
+            return A * (B ** -1)
+
+    def __rtruediv__(A, B):
+        if _math.is_scalar(B):
+            return (A ** -1) * B
 
     def __pow__(self, n):
         if not isinstance(n, int):
@@ -235,7 +329,6 @@ class Matrix(Tensor):
             return self * self ** (n - 1)
         else:
             return self.inverse() ** (-n)
-
 
     def __iter__(self):
         elements_list = []
@@ -255,8 +348,10 @@ class Matrix(Tensor):
         self.__elements[m][n] = value
 
     def __repr__(self):
-        expression = 'Matrix('
-        for row in self.__elements:
-            expression += '\n    ' + str(row)
+        expression = 'Matrix(\n'
+        expression += ' ' + str(np.array(self.__elements))[1:-1]
         expression += ') \n'
         return expression
+
+def linear_transformation(M, V):
+    pass

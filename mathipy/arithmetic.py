@@ -1,9 +1,10 @@
 from mathipy.functions import logarithmic 
-
-e = 2.718281828459045
-pi = 3.141592653589793
-tau = 2 * pi
+e     = 2.718281828459045
+pi    = 3.141592653589793
+tau   = 2 * pi
 sqrt2 = 2 ** (1/2)
+phi   = 1.618033988749894
+gamma = 0.577215664901532860
 
 class AlgebraicExpression:
     consts = {
@@ -11,8 +12,8 @@ class AlgebraicExpression:
         'pi'    : pi,
         'tau'   : tau,
         'sqrt2' : sqrt2,
-        'phi'   : 1.618033988749894,
-        'gamma' : 0.577215664901532860
+        'phi'   : phi,
+        'gamma' : gamma
     }
 
 class Sum(AlgebraicExpression):
@@ -82,15 +83,15 @@ class Root(AlgebraicExpression):
         return self.a.evaluate(vars) ** (1 / self.b.evaluate(vars))
 
 class Logarithm(AlgebraicExpression):
-    def __init__(self, a, b):
+    def __init__(self, a, base):
         self.a = a
-        self.b = b
+        self.base = base
 
     def __repr__(self):
-        return f'Log_{self.b}({self.a})'
+        return f'Log_{self.base}({self.a})'
 
     def evaluate(self, vars):
-        return logarithmic.Log.log(self.a.evaluate(vars), self.b.evaluate(vars))
+        return logarithmic.Log.log(self.a.evaluate(vars), self.base.evaluate(vars))
 
 class Variable(AlgebraicExpression):
     def __init__(self, name):

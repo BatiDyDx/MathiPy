@@ -1,7 +1,7 @@
-from mathipy.functions import normal_dist as nd   
 import matplotlib.pyplot as plt
+from mathipy.functions import normal_dist as nd   
 from mathipy import _math
-from mathipy import arithmetic as artc 
+from mathipy import arithmetic as arm
 
 def variation(n, k, repetitions = False):
     if not k <= n: raise ValueError('k must be less than n')
@@ -42,9 +42,9 @@ class Statistics(object):
         n = len(self.iterable)
         mean = self.mean()
         x_1 = 1 / n
-        arg = artc.Power(artc.Minus(artc.Variable('x'), artc.Constant(mean)), artc.Constant(2))
-        x_2 = _math.summation(arg, upper_bound = n, lower_bound = 0, iterable = self.iterable)
-        s = np.sqrt(x_1 * x_2)
+        f = lambda x: (x - mean) ** 2
+        x_2 = _math.summation(arg, up_bound = n, low_bound = 0)
+        s = _math.sqrt(x_1 * x_2)
         return s
 
     def median(self):
@@ -52,9 +52,9 @@ class Statistics(object):
         iterable.sort()
         n = len(iterable)
         if n % 2 == 1:
-            return iterable[int(n / 2)]
+            return iterable[n // 2]
         else:
-            x_1, x_2 = iterable[n/2 - 1], iterable[n/2]
+            x_1, x_2 = iterable[(n // 2) - 1], iterable[n // 2]
             return (x_1 + x_2) / 2 
 
     def mode(self):
