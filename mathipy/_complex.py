@@ -1,9 +1,8 @@
+from fractions import Fraction
 import numpy as np
 import matplotlib.pyplot as plt
 from mathipy import _math
-from mathipy import arithmetic as arm
-from mathipy import linalg
-from fractions import Fraction
+from mathipy import numeric_operations as ops
 
 class Complex(object):
     __class__ = complex
@@ -17,10 +16,14 @@ class Complex(object):
             self.r = x
             self.theta = y
             a = self.r * _math.cos(self.theta)
-            self.a = _math.round_int(a)
+            self.a = ops.round_int(a)
             b = self.r * _math.sin(self.theta)
-            self.b = _math.round_int(b)
-
+            self.b = ops.round_int(b)
+        
+        self.a = ops.round_int(self.a)
+        self.b = ops.round_int(self.b)
+        self.r = ops.round_int(self.r)
+    
     @property
     def real(self):
         return self.a
@@ -42,9 +45,7 @@ class Complex(object):
             return Complex(z.real + w, z.imag)  
         else:
             real_part = z.real + w.real
-            real_part = _math.round_int(real_part)
             imag_part = z.imag + w.imag
-            imag_part = _math.round_int(imag_part)
             return Complex(real_part, imag_part)
 
     def __radd__(z, w):
@@ -59,13 +60,11 @@ class Complex(object):
     def __mul__(z, w):
         if isinstance(w, (int, float)):
             return Complex(z.real * w, z.imag * w)  
-        elif isinstance(w, linalg.Tensor):
+        elif ops.is_iter(w):
             return w.__rmul__(z)
 
         real_part = (z.real * w.real) - (z.imag * w.imag)
-        real_part = _math.round_int(real_part)
         imag_part = (z.real * w.imag) + (z.imag * w.real)
-        imag_part = _math.round_int(imag_part)
         return Complex(real_part, imag_part)
 
     def __rmul__(z, w):
@@ -118,8 +117,8 @@ class Complex(object):
         if isinstance(a, complex):
             return _math.e ** (z * _math.ln(a))
         else:
-            x = _math.round_int(_math.cos(_math.ln(a) * z.b))
-            y = _math.round_int(_math.sin(_math.ln(a) * z.b))
+            x = ops.round_int(_math.cos(_math.ln(a) * z.b))
+            y = ops.round_int(_math.sin(_math.ln(a) * z.b))
             w = Complex(x, y)
             return (a ** z.a) * w
 
@@ -191,13 +190,10 @@ class Complex(object):
 
     def inverse(self):
         real_denominator, imag_denominator = self.split() 
-
-        denominator = (self.a)**2 + (self.b)**2
-        real_part = self.a/denominator
-        real_part = _math.round_int(real_part)
-        imag_part = - self.b/denominator
-        imag_part = _math.round_int(imag_part)
-
+        denominator = (self.a) ** 2 + (self.b) ** 2
+        real_part = self.a / denominator
+        imag_part = - self.b / denominator
+        
         return Complex(real_part, imag_part)
 
     def plot(self, coordinate='cartesian'):
@@ -265,15 +261,6 @@ class Complex(object):
             roots.append(Complex(r, theta, coordinate='Polar'))
         return roots
 
-    @staticmethod
-    def to_Complex(X, Y, **kwargs):
-        c = kwargs.get('coordinate', 'Cartesian')
-        if _math.is_scalar(X) and _math.is_scalar(Y):
-            return Complex(X, Y, coordinate=c)
-        else:
-            for x,y in zip(X,Y):
-                yield Complex(x,y, coordinate=c)
-
     def phase(self):
         if self.a == 0:
             if self.b > 0:
@@ -304,31 +291,38 @@ class Complex(object):
         return str(self)
 
 def real(Z):
-    if _math.is_scalar(Z):
+    if ops.is_scalar(Z):
         return Z.real
-    elif _math.is_iter(Z):
+    elif ops.is_iter(Z):
         return np.array(list(map(real, Z)))
 
 def imag(Z):
-    if _math.is_scalar(Z):
+    if ops.is_scalar(Z):
         return Z.imag
-    elif _math.is_iter(Z):
+    elif ops.is_iter(Z):
         return np.array(list(map(imag, Z)))
 
 def module(Z):
-    if _math.is_scalar(Z):
+    if ops.is_scalar(Z):
         try:
             return Z.mod
         except AttributeError:
             return Complex(Z.real, Z.imag).mod
-    elif _math.is_iter(Z):
+    elif ops.is_iter(Z):
         return np.array(list(map(module, Z)))
 
 def argument(Z):
-    if _math.is_scalar(Z):
+    if ops.is_scalar(Z):
         try:
             return Z.arg
         except AttributeError:
             return Complex(Z.real, Z.imag).arg
-    elif _math.is_iter(Z):
+    elif ops.is_iter(Z):
         return np.array(list(map(argument, Z)))
+
+def to_Complex(Z):
+    if ops.is_iter(Z):
+        f = lambda z: to_Complex(z)
+        return list(map(f, Z))
+    else:
+        return Complex(Z.real, Z.imag)

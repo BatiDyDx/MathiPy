@@ -1,13 +1,14 @@
-from mathipy import calculus, _math, _complex
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+from mathipy import calculus, _complex as C
+from mathipy import numeric_operations as ops
 
 class Complex_Function(calculus.Function):
     def __init__(self, f):
         self.f = f
 
     def calculate_values(self, z):
-        if _math.is_scalar(z):
+        if ops.is_scalar(z):
             return self.f(z)
         else:
             return list(map(self.calculate_values, z))
@@ -22,7 +23,7 @@ class Complex_Function(calculus.Function):
         x = np.linspace(x_min, x_max, s)
         y = np.linspace(y_min, y_max, s)
         X, Y = np.meshgrid(x,y)
-        W = np.array(self.calculate_values(X + Y * _complex.Complex(0,1)))
+        W = np.array(self.calculate_values(X + Y * C.Complex(0,1)))
 
         if plot_type == 'conformal_map':
             self.conformal_map(X, Y, W, **kwargs)
@@ -90,8 +91,8 @@ class Complex_Function(calculus.Function):
         rcc = kwargs.get('rcc', 'b')
         icc = kwargs.get('icc', 'r')
         fig, ax = plt.subplots()
-        ax.contour(X, Y, _complex.real(W), colors=rcc, linestyles=ls, levels=lv, alpha=a)
-        ax.contour(X, Y, _complex.imag(W), colors=icc, linestyles=ls, levels=lv, alpha=a)
+        ax.contour(X, Y, C.real(W), colors=rcc, linestyles=ls, levels=lv, alpha=a)
+        ax.contour(X, Y, C.imag(W), colors=icc, linestyles=ls, levels=lv, alpha=a)
         ax.set_xlabel("$x$",fontsize=15)
         ax.set_ylabel("$y$",fontsize=15)
         ax.set_title("Conformal map: lines of constant $u: {\\rm Re}[w]$ and $v: {\\rm Im}[w]$")
@@ -105,13 +106,13 @@ class Complex_Function(calculus.Function):
         w_feature = kwargs.get('output_feature', 'module')
 
         if w_feature in ('real', 'a'):
-            f = _complex.real
+            f = C.real
         elif w_feature in ('imag', 'b'):
-            f = _complex.imag
+            f = C.imag
         elif w_feature in ('module', 'mod', 'r'):
-            f = _complex.module
+            f = C.module
         elif w_feature in ('argument', 'arg', 'theta'):
-            f = _complex.argument
+            f = C.argument
 
         fig = plt.figure()
         ax = fig.add_subplot(projection=proj)

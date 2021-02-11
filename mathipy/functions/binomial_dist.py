@@ -1,4 +1,5 @@
-from mathipy import calculus, statistics
+import matplotlib.pyplot as plt
+from mathipy import calculus, numeric_operations as ops
 
 class BinomialDistribution(calculus.Function):
     function_type = 'Binomial Distribution'
@@ -9,7 +10,7 @@ class BinomialDistribution(calculus.Function):
             raise ValueError('The probability parameter, p, must be between 0 and 1')
     
     def calculate_values(self, x):
-        c = statistics.combinatorial(n = self.n, k = x)
+        c = ops.combinatorial(n = self.n, k = x)
         y = c * self.p ** (x) * (1 - self.p) ** (self.n - x)
         return y
 
@@ -23,6 +24,7 @@ class BinomialDistribution(calculus.Function):
         plt.ylabel('$P(x)$')
         for i in range(1, self.n):
             ax.scatter(i, self(i), c = c)
+        plt.show()
 
     def __repr__(self):
         return f'X ~ B({self.n}, {self.p})'

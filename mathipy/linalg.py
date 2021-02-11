@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt
 import numpy as np
-from mathipy import _complex
+import matplotlib.pyplot as plt
 from mathipy import _math
+from mathipy import numeric_operations as ops
 
 class Tensor():
     """
@@ -72,7 +72,7 @@ class Vector(Tensor):
                     cross_product += v_el * u_el
                 return cross_product
     
-        elif _math.is_scalar(u):
+        elif ops.is_scalar(u):
             scaled_v = map(lambda val: val * u, v.__elements)
             return Vector(*scaled_v)
 
@@ -146,7 +146,7 @@ class Vector(Tensor):
 class Matrix(Tensor):
     rank = 2
     def __init__(self, *args):
-        self.__elements = _math.round_int(list(args))
+        self.__elements = ops.round_int(list(args))
         self.m_dimension = len(self.__elements)
         self.n_dimension = max([len(row) for row in self.__elements])
         self.shape = (self.m_dimension, self.n_dimension)
@@ -305,19 +305,19 @@ class Matrix(Tensor):
         
 
     def __rmatmul__(A, B):
-        if _math.is_scalar(B):
+        if ops.is_scalar(B):
             return A * B
         elif isinstance(B, Vector):
             return B.to_matrix() * A
 
     def __truediv__(A, B):
-        if _math.is_scalar(B):
+        if ops.is_scalar(B):
             return A * (1 / B)
         else:
             return A * (B ** -1)
 
     def __rtruediv__(A, B):
-        if _math.is_scalar(B):
+        if ops.is_scalar(B):
             return (A ** -1) * B
 
     def __pow__(self, n):

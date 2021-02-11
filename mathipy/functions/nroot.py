@@ -1,5 +1,5 @@
 from mathipy import calculus, _math
-from mathipy import _complex
+from mathipy import numeric_operations as ops
 
 class NRoot(calculus.Function):
     function_type = 'N-Root'
@@ -13,20 +13,6 @@ class NRoot(calculus.Function):
         if n == 0:
             raise ValueError('Root index cannot be 0')
 
-    @staticmethod
-    def root(arg, index = 2, return_complex = True):
-        if _math.is_iter(arg):
-            return np.array(list(map(NRoot.root, arg)))
-        if isinstance(arg, complex):
-            return arg ** (1 / index)
-        if arg >= 0:
-            return arg ** (1/index)
-        else:
-            if index % 2 == 0:
-                return _complex.Complex(0, NRoot.root(-arg)) if return_complex else None
-            else:
-                return - NRoot.root(-arg, index)
-
     def get_yint(self):
         return self(0)
 
@@ -37,11 +23,11 @@ class NRoot(calculus.Function):
             return None
 
     def calculate_values(self, x):
-        f = lambda x: self.__a * NRoot.root((self.__k * x + self.__p), self.__n, return_complex = False) + self.__b
+        f = lambda x: self.__a * _math.root_n((self.__k * x + self.__p), self.__n, return_complex= False) + self.__b
         try:
             y = f(x)
         except TypeError:
-            if _math.is_iter(x):
+            if ops.is_iter(x):
                 return list(map(self.calculate_values, x))
             else: return None
         else:
@@ -51,8 +37,8 @@ class NRoot(calculus.Function):
         return self.calculate_values(x)
 
     def plot_func(self, ax):
-        ax.scatter(0, self.get_yint(), color = calculus.Function.function_part['y-intercept'])
-        ax.scatter(self.find_roots(), 0, color = calculus.Function.function_part['roots'])
+        ax.scatter(0, self.get_yint(), color= calculus.Function.function_part['y-intercept'])
+        ax.scatter(self.find_roots(), 0, color= calculus.Function.function_part['roots'])
 
     def __repr__(self):
         representation = ''

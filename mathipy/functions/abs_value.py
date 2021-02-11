@@ -23,20 +23,19 @@ class AbsoluteValue(calculus.Function):
             x2 = - delta + self.__h
         return x1, x2
 
-    def calculate_values(x):
-        y = self.a * _math.abs(x - self.h) + self.b
+    def calculate_values(self, x):
+        y = self.__a * _math.abs(x - self.__h) + self.__b
         return y
 
     def plot_func(self, ax):
         y_intercept = self(0)
-        ax.scatter(0, y_intercept, c = calculus.Function.function_part['y-intercept'])
+        ax.scatter(0, y_intercept, color= calculus.Function.function_part['y-intercept'])
         if self.__x1 != None and self.__x2 != None:
-            ax.scatter(self.__roots, (0,0), c = calculus.Function.function_part['roots'])
-        ax.scatter(self.__h, self.__b, c = calculus.Function.function_part['vertex'])
+            ax.scatter(self.__roots, (0,0), color= calculus.Function.function_part['roots'])
+        ax.scatter(self.__h, self.__b, color= calculus.Function.function_part['vertex'])
 
     def __call__(self, x):
-        y = self.calculate_values(x)
-        return y
+        return self.calculate_values(x)
 
     def __repr__(self):
         representation = ''
@@ -45,11 +44,11 @@ class AbsoluteValue(calculus.Function):
         if self.__h > 0:
             representation += f'|x - {self.__h}|'
         elif self.__h < 0:
-            representation += f'|x + {_math.abs(self.__h)}|'
+            representation += f'|x + {abs(self.__h)}|'
         else:
             representation += f'|x|'
         if self.__b < 0:
-            representation += f' - {_math.abs(self.__b)}'
+            representation += f' - {abs(self.__b)}'
         elif self.__b > 0:
             representation += f' + {self.__b}'
         return representation

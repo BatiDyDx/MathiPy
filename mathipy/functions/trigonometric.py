@@ -1,5 +1,5 @@
-from mathipy import calculus 
 import numpy as np
+from mathipy import calculus, _math
 
 class Trigonometric(calculus.Function):
     function_type = 'Trigonometric'
@@ -9,7 +9,7 @@ class Trigonometric(calculus.Function):
         self.k = kwargs.get('k', 0)
         self.c = kwargs.get('c', 0)
         self.exp = kwargs.get('exp', 1)
-        self.period = 2 * np.pi / self.n
+        self.period = _math.tau / self.n
 
     def calculate_values(self, x):
         y = self.a * (self.trigonometric_function(self.n * x + self.k) ** self.exp) + self.c
@@ -56,17 +56,17 @@ class Trigonometric(calculus.Function):
 #sus reciprocas y sus inversas
 
 class Sin(Trigonometric):
-    trigonometric_function = np.sin
+    trigonometric_function = _math.sin
     function_representation = 'Sin'
 
     def find_roots(self, lower_bound, upper_bound, **kwargs):
-        min_int = int(np.floor(lower_bound * abs(self.n) / np.pi - 1))
-        max_int = int(np.ceil( upper_bound * abs(self.n) / np.pi + 1))
+        min_int = int(np.floor(lower_bound * abs(self.n) / _math.pi - 1))
+        max_int = int(np.ceil( upper_bound * abs(self.n) / _math.pi + 1))
         ints = [i for i in range(min_int, max_int)]
-        #f = lambda i:(np.pi * i  - self.k) / self.n
+        #f = lambda i:(_math.pi * i  - self.k) / self.n
         f = lambda i: i * (np.arcsin(-self.c / self.a)  - self.k) / self.n
         if f(1) == 0:
-            f = lambda i: i * np.pi
+            f = lambda i: i * _math.pi
         p_roots = [f(i) for i in ints if lower_bound <= f(i) <= upper_bound]
         roots = list(filter(lambda root: True if -1e-14 < self(root) < 1e-14 else False, p_roots))
         return roots
@@ -74,27 +74,27 @@ class Sin(Trigonometric):
     def find_roots2(self, lower_bound, upper_bound, **kwargs):
         x = (np.arcsin(-self.c / self.a) - self.k) / self.n
         if x == 0:
-            x = np.pi
+            x = _math.pi
         ints = range(lower_bound, upper_bound + 1)
         p_roots = [x * i for i in ints if lower_bound <= (x * i) <= upper_bound]
         roots = [root for root in p_roots if -1e-14 < self(root) < 1e-14]
         return roots
 
 class Cos(Trigonometric):
-    trigonometric_function = np.cos
+    trigonometric_function = _math.cos
     function_representation = 'Cos'
 
     def find_roots(self, lower_bound, upper_bound, **kwargs):
-        min_int = int(np.floor(lower_bound * abs(self.n) / np.pi - 1))
-        max_int = int(np.ceil( upper_bound * abs(self.n) / np.pi + 1))
+        min_int = int(np.floor(lower_bound * abs(self.n) / _math.pi - 1))
+        max_int = int(np.ceil( upper_bound * abs(self.n) / _math.pi + 1))
         ints = [i for i in range(min_int, max_int)]
-        f = lambda i:(np.pi * i + np.pi/2 - self.k) / self.n
+        f = lambda i:(_math.pi * i + _math.pi/2 - self.k) / self.n
         p_roots = [f(i) for i in ints if lower_bound <= f(i) <= upper_bound]
         roots = list(filter(lambda root: True if -1e-14 < self(root) < 1e-14 else False, p_roots))
         return roots
 
 class Tan(Trigonometric):
-    trigonometric_function = np.tan
+    trigonometric_function = _math.tan
     function_representation = 'Tg'
 
 #class Cosec(Trigonometric):
@@ -103,7 +103,7 @@ class Tan(Trigonometric):
 #
 #  @classmethod
 #  def csc(cls,x):
-#    y = np.sin(x)
+#    y = _math.sin(x)
 #    if y != 0:
 #      return 1 / y
 #    else:
@@ -115,7 +115,7 @@ class Tan(Trigonometric):
 #  
 #  @classmethod
 #  def sec(cls, x):
-#    return 1 / np.cos(x)
+#    return 1 / _math.cos(x)
 #
 #class Cotan(Trigonometric):
 #  trigonometric_function = Cotan.ctg
@@ -123,4 +123,4 @@ class Tan(Trigonometric):
 #  
 #  @classmethod
 #  def ctg(cls, x):
-#    return 1 / np.tan(x)
+#    return 1 / _math.tan(x)

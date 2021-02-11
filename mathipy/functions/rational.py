@@ -1,9 +1,10 @@
-from mathipy import calculus, _math, polynomial
+from mathipy import calculus, polynomial as poly
+from mathipy import numeric_operations as ops
 
 class Rational(calculus.Function):
     function_type = 'Rational'
 
-    def __init__(self, p: polynomial.Polynomial, q: polynomial.Polynomial, **kwargs):
+    def __init__(self, p: poly.Polynomial, q: poly.Polynomial, **kwargs):
         self.p = p
         self.q = q
         self.is_homographic = False
@@ -37,7 +38,7 @@ class Rational(calculus.Function):
 
     def calculate_values(self, x):
         y = self.p(x) / self.q(x)
-        if not _math.is_iter(x):
+        if not ops.is_iter(x):
             y = np.array([y])
         y = [i if -150 <= i <= 150 else None for i in y]
         return y

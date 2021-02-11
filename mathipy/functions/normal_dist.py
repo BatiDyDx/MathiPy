@@ -1,4 +1,4 @@
-from mathipy import calculus
+from mathipy import calculus, _math
 
 class NormalDistribution(calculus.Function):
     function_type = 'Normal Distribution'

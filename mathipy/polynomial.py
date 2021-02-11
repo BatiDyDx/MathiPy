@@ -1,6 +1,5 @@
 import re
 from mathipy import calculus
-from mathipy import _complex
 from mathipy import _math
 
 class Polynomial(calculus.Function):

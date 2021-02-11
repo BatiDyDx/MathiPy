@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mathipy._math as mt
+from mathipy import numeric_operations as ops 
 
 class Function(object):
     function_part = {
@@ -16,7 +16,7 @@ class Function(object):
         self.function = f
 
     def calculate_values(self, x):
-        if mt.is_scalar(x):
+        if ops.is_scalar(x):
             return self.function(x)
         else:
             return list(map(self.function, x))
@@ -30,8 +30,8 @@ class Function(object):
         except ValueError:
             return None
 
-    def plot(self, pos = 0, range = 5, **kwargs):
-        x_min, x_max = pos - range, pos + range
+    def plot(self, pos= 0, rnge= 5, **kwargs):
+        x_min, x_max = pos - rnge, pos + rnge
         x = np.linspace(x_min, x_max, 1000)
         y = self.calculate_values(x)
 
@@ -42,7 +42,7 @@ class Function(object):
         height = kwargs.get('h', 1)
         v_scale = kwargs.get('vertical_scale', 'relative')
         if v_scale == 'relative':
-            y_min, y_max = mt.min(y) - height, mt.max(y) + height
+            y_min, y_max = ops.min(y) - height, ops.max(y) + height
         elif v_scale == 'absolute':
             y_min, y_max = - height / 2, height / 2
 

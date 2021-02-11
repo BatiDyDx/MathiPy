@@ -1,11 +1,10 @@
-from mathipy import calculus
-from mathipy import polynomial
-from mathipy import _complex 
+from mathipy import calculus, polynomial, _complex 
 
 class Quadratic(polynomial.Polynomial):
     function_type = 'Quadratic'
     def __init__(self, a = 1, **kwargs):
         self.__a = a
+        self.degree = 2
         if 'b' in kwargs and 'c' in kwargs:
             b, c = kwargs['b'], kwargs['c']
             self.__b = b

@@ -1,11 +1,10 @@
-import numpy as np
-from mathipy import calculus
+from mathipy import calculus, _math
 from mathipy.functions import logarithmic
 
 class Exponential(calculus.Function):
     function_type = 'Exponential'
     asymptote = True
-    def __init__(self, a = np.e, **kwargs):
+    def __init__(self, a = _math.e, **kwargs):
         self.__k = kwargs.get('k', 1)
         self.__a = a
         self.__n = kwargs.get('n', 1)
@@ -20,7 +19,7 @@ class Exponential(calculus.Function):
 
     def find_roots(self):
         try:
-            root = (logarithmic.Log.log(-self.__c / self.__k, base = self.__a) + self.__b) / self.__n
+            root = (_math.log(-self.__c / self.__k, base= self.__a) + self.__b) / self.__n
         except ValueError:
             root = None
         finally:
@@ -32,12 +31,12 @@ class Exponential(calculus.Function):
 
     def plot_func(self, ax):
         y_int = self.get_yint()
-        ax.scatter(0, y_int, color = calculus.Function.function_part['y-intercept'])
+        ax.scatter(0, y_int, color= calculus.Function.function_part['y-intercept'])
         if self.__root:
-            ax.scatter(self.__root, 0, color = calculus.Function.function_part['roots'])
+            ax.scatter(self.__root, 0, color= calculus.Function.function_part['roots'])
         h_asymptote = self.__c
         x_min, x_max = ax.get_xlim()
-        ax.hlines(h_asymptote, x_min, x_max, color = calculus.Function.function_part['asymptote'], linewidth = 2.5, linestyle = '--')
+        ax.hlines(h_asymptote, x_min, x_max, color= calculus.Function.function_part['asymptote'], linewidth= 2.5, linestyle= '--')
 
     def __call__(self, x):
         return Exponential.calculate_values(self, x)
@@ -46,7 +45,7 @@ class Exponential(calculus.Function):
         representation = ''
         if self.__k != 1:
             representation += str(self.__k) + ' · '
-        if self.__a == np.e:
+        if self.__a == _math.e:
             representation += 'e^(x'
         else:
             representation += f'{self.__a}^('
