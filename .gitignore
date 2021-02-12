@@ -1,6 +1,7 @@
 .vscode
 #Virtual Enviroment files
 venv
+pyvenv.cfg
 __pycache__
 #Temporal
 #setup.py
