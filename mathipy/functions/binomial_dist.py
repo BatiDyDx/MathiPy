@@ -24,6 +24,7 @@ class BinomialDistribution(calculus.Function):
         plt.ylabel('$P(x)$')
         for i in range(1, self.n):
             ax.scatter(i, self(i), c = c)
+        plt.grid()
         plt.show()
 
     def __repr__(self):

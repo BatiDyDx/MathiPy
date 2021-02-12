@@ -19,7 +19,7 @@ class Trigonometric(calculus.Function):
         return self.calculate_values(x)
 
     def plot_func(self, ax):
-        ax.scatter(0, self(0), color = calculus.Function.function_part['y-intercept'])
+        ax.scatter(0, self(0), color=calculus.Function.function_part['y-intercept'])
         x_min, x_max = ax.get_xlim()
         roots = [root for root in self.find_roots(x_min, x_max)]
         zeros = [0] * len(roots)
@@ -56,7 +56,7 @@ class Trigonometric(calculus.Function):
 #sus reciprocas y sus inversas
 
 class Sin(Trigonometric):
-    trigonometric_function = _math.sin
+    trigonometric_function = lambda s, x: _math.sin(x)
     function_representation = 'Sin'
 
     def find_roots(self, lower_bound, upper_bound, **kwargs):
@@ -81,7 +81,7 @@ class Sin(Trigonometric):
         return roots
 
 class Cos(Trigonometric):
-    trigonometric_function = _math.cos
+    trigonometric_function = lambda s, x: _math.cos(x)
     function_representation = 'Cos'
 
     def find_roots(self, lower_bound, upper_bound, **kwargs):

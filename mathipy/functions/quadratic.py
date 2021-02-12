@@ -1,4 +1,4 @@
-from mathipy import calculus, polynomial, _complex 
+from mathipy import calculus, polynomial, _complex, _math
 
 class Quadratic(polynomial.Polynomial):
     function_type = 'Quadratic'
@@ -53,14 +53,14 @@ class Quadratic(polynomial.Polynomial):
     
         elif root_body < 0:
             x1_real = x2_real = - b / (2 * a)
-            x1_imag = np.sqrt(abs(root_body)) / (2 * a)
-            x2_imag = - np.sqrt(abs(root_body)) / (2 * a)
+            x1_imag = _math.sqrt(_math.abs(root_body)) / (2 * a)
+            x2_imag = - _math.sqrt(_math.abs(root_body)) / (2 * a)
             x1 = _complex.Complex(x1_real, x1_imag)
             x2 = _complex.Complex(x2_real, x2_imag)
 
         elif root_body > 0:
-            x1 = (-b + np.sqrt(root_body)) / (2 * a)
-            x2 = (-b - np.sqrt(root_body)) / (2 * a)
+            x1 = (-b + _math.sqrt(root_body)) / (2 * a)
+            x2 = (-b - _math.sqrt(root_body)) / (2 * a)
 
         return x1, x2
 

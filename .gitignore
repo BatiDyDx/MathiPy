@@ -1,3 +1,5 @@
+#Visual Studio Code and PyCharm files
+.idea
 .vscode
 #Virtual Enviroment files
 venv
