@@ -20,9 +20,7 @@ class Complex(object):
             b = self.r * _math.sin(self.theta)
             self.b = ops.round_int(b)
         
-        self.a = ops.round_int(self.a)
-        self.b = ops.round_int(self.b)
-        self.r = ops.round_int(self.r)
+        self.a, self.b, self.r = ops.round_int([self.a, self.b, self.r])
     
     @property
     def real(self):
@@ -43,10 +41,12 @@ class Complex(object):
     def __add__(z, w):
         if isinstance(w, (int, float)):
             return Complex(z.real + w, z.imag)  
-        else:
+        elif isinstance(w, complex):
             real_part = z.real + w.real
             imag_part = z.imag + w.imag
             return Complex(real_part, imag_part)
+        else:
+            return w.__add__(z)
 
     def __radd__(z, w):
         return z + w
@@ -55,30 +55,32 @@ class Complex(object):
         return z + (-w)
 
     def __rsub__(z, w):
-        return w + (-z)
+        return (-z) + w
 
     def __mul__(z, w):
-        if isinstance(w, (int, float)):
-            return Complex(z.real * w, z.imag * w)  
-        elif ops.is_iter(w):
+        if ops.is_scalar(w):
+            if isinstance(w, (int, float)):
+                return Complex(z.real * w, z.imag * w)  
+            else:
+                real_part = (z.real * w.real) - (z.imag * w.imag)
+                imag_part = (z.real * w.imag) + (z.imag * w.real)
+                return Complex(real_part, imag_part)
+        else:
             return w.__rmul__(z)
-
-        real_part = (z.real * w.real) - (z.imag * w.imag)
-        imag_part = (z.real * w.imag) + (z.imag * w.real)
-        return Complex(real_part, imag_part)
 
     def __rmul__(z, w):
         return z * w
 
     def __truediv__(z, w):
-        if isinstance(w, (int, float)):
-            return Complex(z.a / w, z.b / w)  
-        elif isinstance(w, complex):
-            return z * (1 / w)
-        elif isinstance(w, Complex):
-            return z * w.inverse()
+        if ops.is_scalar(w):
+            if isinstance(w, (int, float)):
+                return Complex(z.a / w, z.b / w)  
+            elif isinstance(w, complex):
+                return z * (1 / w)
+            elif isinstance(w, Complex):
+                return z * w.inverse()
         else:
-            raise TypeError(f'{type(w)} does not support Complex division')
+            return w.__rtruediv__(z)
 
     def __rtruediv__(z, w):
         return z.inverse() * w
@@ -87,13 +89,9 @@ class Complex(object):
         if isinstance(w, (int, float)):
             return Complex(z.a // w, z.b // w)  
         elif isinstance(w, complex):
-            result = z * (1 / w)
-            result.a, result.b = int(result.a), int(result.b)
-            return result
-        elif isinstance(w, Complex):
-            result = z * w.inverse()
-            result.a, result.b = int(result.a), int(result.b)
-            return result
+            r = z * (1 / w)
+            r.a, r.b = int(r.a), int(r.b)
+            return r
         else:
             raise TypeError(f'{type(w)} does not support Complex floor division')
 
@@ -154,25 +152,10 @@ class Complex(object):
         else:
             return True
 
-    def add(self, w):
-        return self + w
-
-    def sub(self, w):
-        return self - w
-
-    def mul(self, w):
-        return self * w
-
-    def divide(self, w):
-        return self / w
-
-    def power(self, w):
-        return self ** w
-
     def split(self):
         return self.a, self.b
 
-    def root(self, n: int, all_roots = False):
+    def root(self, n: int, all_roots= False):
         r = self.r ** (1 / n)
         if all_roots:
             #return Complex.unit_circle_roots(self.mod, )
@@ -253,7 +236,7 @@ class Complex(object):
             return Complex(0,-1)
 
     @staticmethod
-    def circle_roots(n: int, r = 1):
+    def circle_roots(n: int, r= 1):
         roots = []
         w = _math.tau / n
         for k in range(n):

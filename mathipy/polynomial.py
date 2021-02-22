@@ -1,6 +1,7 @@
 import re
 from mathipy import calculus
 from mathipy import _math
+from mathipy import numeric_operations as ops
 
 class Polynomial(calculus.Function):
     function_type = 'Polynomial'
@@ -9,7 +10,7 @@ class Polynomial(calculus.Function):
             values = [[degree, coef] for degree, coef in enumerate(args)]
         elif kwargs:
             values = self.__process_coefficents(kwargs)
-        while values[-1][1] == 0:
+        while values[-1][1] == 0 and len(values) > 1:
             del values[-1]
 
         domain = 'Complex'
@@ -32,7 +33,6 @@ class Polynomial(calculus.Function):
         self.__domain = domain
         self.__values = values
         self.degree = len(values) - 1
-        self.__algebraic_expression = self.alg_exp(self.__values[::-1])
 
     def __process_coefficents(self, kwargs):
         f = lambda degree: int(re.findall('\d+$', degree)[0])
@@ -51,11 +51,17 @@ class Polynomial(calculus.Function):
         return listed_coefficients
 
     def __add__(q, p):
-        poly1 = q.coefficients()
-        poly2 = p.coefficients()
-        coef_tuple = list(zip(poly1, poly2))
-        poly3 = [x + y for x,y in coef_tuple]
-        return Polynomial(*(poly3))
+        if ops.is_scalar(p):
+            p = Polynomial(p)
+        max_degree = ops.max([len(q), len(p)]) + 1
+        coefs_1 = q.coefficients(max_degree)
+        coefs_2 = p.coefficients(max_degree)
+        coef_tuple = list(zip(coefs_1, coefs_2))
+        coefs_3 = [x + y for x, y in coef_tuple]
+        return Polynomial(*(coefs_3))
+
+    def __radd__(q, p):
+        return q + p
 
     def __sub__(q, p):
         return q + (-p)
@@ -76,11 +82,12 @@ class Polynomial(calculus.Function):
                     coef = c[1] * k[1]
                     r[exp] += coef
             return Polynomial(*r)
-        else:
+        elif ops.is_scalar(p):
             poly1 = q.coefficients()
-            f = lambda item: item * p
-            poly2 = list(map(f, poly1))
+            poly2 = [i * p for i in poly1]
             return Polynomial(*(poly2))
+        else:
+            return p * q
 
     def __rmul__(q, p):
         return q * p
@@ -134,9 +141,15 @@ class Polynomial(calculus.Function):
     def sub(self, p):
         return self - p
 
-    def coefficients(self):
+    def coefficients(self, length=-1):
         coefs = [x[1] for x in self.__values]
+        if length > -1:
+            while len(coefs) < length:
+                coefs.append(0)
         return coefs
+
+    def __iter__(self):
+        return iter(self.coefficients())
 
     def __call__(self, x):
         return self.calculate_values(x)
@@ -146,6 +159,9 @@ class Polynomial(calculus.Function):
         for degree, coef in enumerate(self.coefficients()):
             result += coef * (x)**degree 
         return result
+
+    def find_roots(self):
+        pass
 
     def get_domain(self):
         return self.__domain
@@ -157,31 +173,15 @@ class Polynomial(calculus.Function):
         y_intercept = self(0)
         ax.scatter(0, y_intercept, color = calculus.Function.function_part['y-intercept'])
 
-    def alg_exp(self, iter):
-        expression = ''
-        #TODO algebraic expression
-
-        for degree, coef in iter:
-            if coef > 0:
-                if degree == 0:
-                    expression += f'+ {coef}'
-                elif degree == 1:
-                    expression += f'+ {coef}x '
-                elif degree == self.degree:
-                    expression += f'{coef}x^{degree} '
-                else:
-                    expression += f'+ {coef}x^{degree} '
-            elif coef < 0:
-                if degree == 0:
-                    expression += f'- {_math.abs(coef)}'
-                elif degree == 1:
-                    expression += f'- {_math.abs(coef)}x '
-                elif degree == self.degree:
-                    expression += f'- {_math.abs(coef)}x^{degree} '
-                else:
-                    expression += f'- {_math.abs(coef)}x^{degree} '
-
-        return expression
-
     def __repr__(self):
-        return self.__algebraic_expression
+        expression = []
+        #TODO algebraic expression
+        for degree, coef in self.__values:
+            if coef != 0:
+                if degree != 0:
+                    s = f'{coef}x^{degree}'
+                else:
+                    s = str(coef)
+                expression.append(s)
+        expression = ' + '.join(expression[::-1])
+        return expression

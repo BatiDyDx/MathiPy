@@ -1,6 +1,11 @@
 from mathipy import _math
+from mathipy import arithmetic
 
 class AlgebraicExpression:
+    '''
+    Mathematical algebraic expressions
+    for operating with multiple variables
+    '''
     consts = {
         'e'     : _math.e,
         'pi'    : _math.pi,
@@ -9,83 +14,48 @@ class AlgebraicExpression:
         'phi'   : _math.phi,
         'gamma' : _math.gamma
     }
+    def __config__(self):
+        if not isinstance(self.a, AlgebraicExpression):
+            self.a = Constant(self.a)
 
-class Sum(AlgebraicExpression):
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
+        if not isinstance(self.b, AlgebraicExpression):
+            self.b = Constant(self.b)
 
-    def __repr__(self):
-        return f'({self.a} + {self.b})'
+    def __add__(a, b):
+        return arithmetic.addition.Sum(a, b)
 
-    def evaluate(self, vars):
-        return self.a.evaluate(vars) + self.b.evaluate(vars)
+    def __radd__(a, b):
+        return a + b
 
-class Minus(AlgebraicExpression):
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
+    def __sub__(a, b):
+        return arithmetic.addition.Minus(a, b)
 
-    def __repr__(self):
-        return f'({self.a} - {self.b})'
+    def __rsub__(a, b):
+        return -a + b
 
-    def evaluate(self, vars):
-        return self.a.evaluate(vars) - self.b.evaluate(vars)
+    def __mul__(a, b):
+        return arithmetic.multiplication.Product(a, b)
 
-class Product(AlgebraicExpression):
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
+    def __rmul__(a, b):
+        return a * b
+    
+    def __neg__(a):
+        return a * -1
 
-    def __repr__(self):
-        return f'({self.a} * {self.b})'
+    def __truediv__(a, b):
+        return arithmetic.multiplication.Division(a, b)
 
-    def evaluate(self, vars):
-        return self.a.evaluate(vars) * self.b.evaluate(vars)
+    def __rtruediv__(a, b):
+        return b * (1 / a)
+    
+    def __pow__(a, b):
+        return arithmetic.power.Power(a, b)
 
-class Division(AlgebraicExpression):
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
+    def __rpow__(a, b):
+        return arithmetic.power.Power(b, a)
 
-    def __repr__(self):
-        return f'([{self.a}] / [{self.b}])'
-
-    def evaluate(self, vars):
-        return self.a.evaluate(vars) / self.b.evaluate(vars)
-
-class Power(AlgebraicExpression):
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
-
-    def __repr__(self):
-        return f'{self.a}^({self.b})'
-
-    def evaluate(self, vars):
-        return self.a.evaluate(vars) ** self.b.evaluate(vars)
-
-class Root(AlgebraicExpression):
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
-
-    def __repr__(self):
-        return f'{self.b}-Root({self.a})'
-
-    def evaluate(self, vars):
-        return self.a.evaluate(vars) ** (1 / self.b.evaluate(vars))
-
-class Logarithm(AlgebraicExpression):
-    def __init__(self, a, base):
-        self.a = a
-        self.base = base
-
-    def __repr__(self):
-        return f'Log_{self.base}({self.a})'
-
-    def evaluate(self, vars):
-        return _math.log(self.a.evaluate(vars), self.base.evaluate(vars))
+    def __call__(self, v):
+        return self.evaluate(v)
 
 class Variable(AlgebraicExpression):
     def __init__(self, name):
@@ -102,7 +72,7 @@ class Constant(AlgebraicExpression):
         self.value = value
 
     def __repr__(self):
-        return '(' + str(self.value) + ')'
+        return str(self.value)
 
     def evaluate(self, vars):
         if isinstance(self.value, str):
@@ -110,7 +80,7 @@ class Constant(AlgebraicExpression):
         else:
             return self.value
 
-class Infinite():
+class Infinite:
     def __init__(self, neg = False):
         self.neg_inf = neg
 
@@ -156,36 +126,51 @@ class Infinite():
         else:
             return '-Infinite'
 
-class Undefined():
+class Undefined:
     def __add__(self, n):
         return self
+    
     def __radd__(self, n):
         return self
+    
     def __sub__(self, n):
         return self
+    
     def __rsub__(self, n):
         return self
+    
     def __mul__(self, n):
         return self
+    
     def __rmul__(self, n):
         return self
+    
     def __truediv__(self, n):
         return self
+    
     def __rtruediv__(self, n):
         return self
+    
     def __floordiv__(self, n):
         return self
+    
     def __rfloordiv__(self, n):
         return self
+    
     def __pow__(self, n):
         return self
+    
     def __rpow__(self, n):
         return self
+    
     def __neg__(self):
         return self
+    
     def __bool__(self):
         return False
+    
     def __str__(self):
         return 'undefined'
+    
     def __repr__(self):
         return 'undefined'

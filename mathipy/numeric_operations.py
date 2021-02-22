@@ -1,4 +1,4 @@
-def round_int(n, thresh_exp = 3):
+def round_int(n, thresh_exp= 3):
     floor_thresh = 1 * (10 ** -thresh_exp)
     ceil_thresh = 1 - floor_thresh
     if isinstance(n, complex):
@@ -25,7 +25,7 @@ def is_iter(it, exclude = None) -> bool:
 def is_scalar(a):
     return isinstance(a, (int, float, complex))
 
-from mathipy import _math 
+from mathipy import _math
 def variation(n, k, repetitions = False):
     if not k <= n: raise ValueError('k must be less than n')
     if repetitions:

@@ -33,9 +33,6 @@ class Quadratic(polynomial.Polynomial):
         if self.__a == 0:
             raise ValueError('a term cannot be equal to 0')
 
-        values = polynomial.Polynomial(self.__c, self.__b, self.__a).get_values()
-        self.__algebraic_expression = self.alg_exp(values[::-1])
-
     def get_roots(self):
         return self.__roots
 
@@ -75,9 +72,6 @@ class Quadratic(polynomial.Polynomial):
             ax.scatter(roots, (0,0), c = calculus.Function.function_part['roots'])
         ax.scatter(*vertex, c = calculus.Function.function_part['vertex'])
         ax.scatter(0, self.__c, c = calculus.Function.function_part['y-intercept'])
-
-    def __str__(self):
-        return self.__algebraic_expression
 
     def vertex_expression(self):
         vertex_exp = f'{self.__a}'
@@ -120,3 +114,10 @@ class Quadratic(polynomial.Polynomial):
                 factored_exp += 'x'
 
         return factored_exp
+
+    def __repr__(self):
+        return polynomial.Polynomial(
+            a2= self.__a, 
+            a1= self.__b, 
+            a0= self.__c
+        ).__repr__()

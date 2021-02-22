@@ -36,7 +36,7 @@ def abs(n):
         else:
             return n
 
-def summation(f, up_bound, low_bound = 0):
+def summation(f, up_bound, low_bound= 0):
     if up_bound < low_bound:
         return 0
     elif up_bound == low_bound:
@@ -63,6 +63,8 @@ def mcm(a, b):
     d = gcd(a,b)
     return (a * b) // d
 
+#TODO
+#Optimise
 def fibonacci(n):
     a, b = 0, 1
     i = 0

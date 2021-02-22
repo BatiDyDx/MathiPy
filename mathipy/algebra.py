@@ -1,0 +1,2 @@
+def ruffini(x):
+    pass
