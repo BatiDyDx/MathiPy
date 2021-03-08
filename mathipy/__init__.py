@@ -10,13 +10,16 @@ from . import (
     polynomial,
     statistics,
 )
+
 from ._complex import (
     Complex, 
     to_Complex, 
     real, 
     imag, 
     module, 
-    argument
+    argument,
+    circle_roots,
+    i,
 )
 
 from ._math import (
@@ -45,6 +48,13 @@ from ._math import (
 )
 #TODO   
 #Add algebra
+from .algebra import (
+    setUnion,
+    setIntersection,
+    setSub,
+    setContains,
+    setIsContained
+)
 
 from .arithmetic import (
     addition,
@@ -55,7 +65,7 @@ from .arithmetic import (
     Undefined
 )
 
-from .calculus import Function
+from .calculus import Function, to_degree, to_radian
 
 from .datastr import (
     BinaryTree,
@@ -81,7 +91,28 @@ from .functions import (
     Tan
 )
 
-from .linalg import Vector, Matrix
+from .linalg import (
+    Vector, 
+    Matrix,
+    vector_addition,
+    dot_product,
+    inner_product,
+    cross_product,
+    tensor_product,
+    matrix_addition,
+    element_wise_product,
+    matrix_product,
+    transpose,
+    determinant,
+    cofactor,
+    adjoint,
+    inverse,
+    k_matrix,
+    zeros_matrix,
+    ones_matrix,
+    identity,
+    linear_transformation
+)
 
 from .numeric_operations import (
     max,
@@ -99,7 +130,14 @@ from .numeric_operations import (
     combinatorial,
 )
 
-from .polynomial import Polynomial
+from .polynomial import (
+    Polynomial,
+    polynomial_addition,
+    polynomial_product,
+    polynomial_division,
+    scalar_product,
+    max_degree
+)
 
 from .statistics import Statistics
 

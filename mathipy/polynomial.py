@@ -1,50 +1,32 @@
 import re
+import numpy as np
 from mathipy import calculus
-from mathipy import _math
 from mathipy import numeric_operations as ops
 
 class Polynomial(calculus.Function):
     function_type = 'Polynomial'
     def __init__(self, *args, **kwargs):
         if args:
-            values = [[degree, coef] for degree, coef in enumerate(args)]
+            values = list(enumerate(args[::-1]))[::-1]
         elif kwargs:
             values = self.__process_coefficents(kwargs)
-        while values[-1][1] == 0 and len(values) > 1:
-            del values[-1]
+        while values[0][1] == 0 and len(values) > 1:
+            del values[0]
 
-        domain = 'Complex'
-        for i in values:
-            if isinstance(i[1], (complex)):
-                break
-        else:
-            domain = 'Real'
-            for i in values:
-                if not float(i[1]).is_integer():
-                    break
-            else:
-                domain = 'Integer'
-                for i in values:
-                    if i[1] < 0:
-                        break
-                else:
-                    domain = 'Natural'
-
-        self.__domain = domain
-        self.__values = values
+        self.values = ops.round_int(values)
         self.degree = len(values) - 1
 
     def __process_coefficents(self, kwargs):
         f = lambda degree: int(re.findall('\d+$', degree)[0])
         listed_coefficients = [[f(degree), coef] for degree, coef in kwargs.items()]
-        listed_coefficients.sort(key = lambda a: a[0])
+        listed_coefficients.sort(key = lambda a: a[0], reverse=True)
         listed_coefficients = Polynomial.__complete_coefficients(listed_coefficients)
         return listed_coefficients
 
     @staticmethod
     def __complete_coefficients(listed_coefficients):
         exponents = [n[0] for n in listed_coefficients]
-        limit = listed_coefficients[-1][0]
+        limit = listed_coefficients[0][0]
         for i in range(limit):
             if i not in exponents:
                 listed_coefficients.insert(i, [i, 0])
@@ -53,100 +35,74 @@ class Polynomial(calculus.Function):
     def __add__(q, p):
         if ops.is_scalar(p):
             p = Polynomial(p)
-        max_degree = ops.max([len(q), len(p)]) + 1
-        coefs_1 = q.coefficients(max_degree)
-        coefs_2 = p.coefficients(max_degree)
-        coef_tuple = list(zip(coefs_1, coefs_2))
-        coefs_3 = [x + y for x, y in coef_tuple]
-        return Polynomial(*(coefs_3))
+        return Polynomial(*polynomial_addition(p, q))
 
-    def __radd__(q, p):
-        return q + p
+    def __radd__(p, q):
+        return q.__add__(p)
 
-    def __sub__(q, p):
-        return q + (-p)
+    def __sub__(p, q):
+        return p + (-q)
 
-    def __neg__(q):
-        coefs = q.coefficients()
-        neg_coefs = map(lambda x: -x, coefs)
-        return Polynomial(*(neg_coefs))
+    def __neg__(p):
+        return p * -1
 
-    def __mul__(q, p):
-        if isinstance(p, Polynomial):
-            poly1 = q.__values
-            poly2 = p.__values
-            r = [0] * (q.degree + p.degree + 1)
-            for c in poly1:
-                for k in poly2:
-                    exp = c[0] + k[0]
-                    coef = c[1] * k[1]
-                    r[exp] += coef
-            return Polynomial(*r)
-        elif ops.is_scalar(p):
-            poly1 = q.coefficients()
-            poly2 = [i * p for i in poly1]
-            return Polynomial(*(poly2))
+    def __mul__(p, q):
+        if isinstance(q, Polynomial):
+            return polynomial_product(p, q)
+        elif ops.is_scalar(q):
+            return scalar_product(p, q)
         else:
-            return p * q
+            return q.__mul__(p)
 
-    def __rmul__(q, p):
-        return q * p
+    def __rmul__(p, q):
+        return p.__mul__(q)
 
-    def __truediv__(q, p):
+    def __truediv__(p, q):
+        pass
+
+    def __floordiv__(p, q):
+        pass
+
+    def __mod__(p, q):
         pass
 
     def __bool__(self):
-        for coef in self.coefficients():
-            if coef == 0:
-                continue
-            else:
-                break
-        else:
-            return True
-        return False
+        return self.coefficients().any() == True
 
-    def __eq__(q, p):
-        if isinstance(p, bool):
-            return bool(q) == p
-        elif isinstance(p, Polynomial):
-            poly1 = q.coefficients()
-            poly2 = p.coefficients()
-            if poly1 == poly2:
-                return True
-            else:
-                return False
+    def __eq__(p, q):
+        if isinstance(q, bool):
+            return bool(p) == q
         else:
-            return False
+            mx_d = max_degree(p, q)
+            return np.array_equal(p.coefficients(mx_d), q.coefficients(mx_d))
 
     def __getitem__(self, index):
         try:
-            item = self.__values[index][1]
+            i = -(1 + index)
+            item = self.coefficients()[i]
         except IndexError:
             item = 0
         finally:
             return item
 
     def __setitem__(self, index, value):
-        self.__values[index][1] = value
+        i = -(1 + index)
+        self.values[i][1] = value
 
     def __delitem__(self, index):
-        self.__values[index][1] = 0
+        i = -(1 + index)
+        self.values[i][1] = 0
 
     def __len__(self):
-        return self.degree
-
-    def add(self, p):
-        return self + p
-
-    def sub(self, p):
-        return self - p
+        return self.degree + 1
 
     def coefficients(self, length=-1):
-        coefs = [x[1] for x in self.__values]
+        coefs = [x[1] for x in self.values]
         if length > -1:
+            if length < len(coefs): raise ValueError('length argument cannot be smaller than polynomial degree')
             while len(coefs) < length:
-                coefs.append(0)
-        return coefs
+                coefs.insert(0, 0)
+        return np.array([coefs])
 
     def __iter__(self):
         return iter(self.coefficients())
@@ -156,32 +112,72 @@ class Polynomial(calculus.Function):
 
     def calculate_values(self, x):
         result = 0
-        for degree, coef in enumerate(self.coefficients()):
-            result += coef * (x)**degree 
+        for degree, coef in self.values:
+            result += coef * x ** degree 
         return result
 
     def find_roots(self):
-        pass
+        return np.roots(self.coefficients())
 
     def get_domain(self):
-        return self.__domain
-
-    def get_values(self):
-        return self.__values
+        domain = 'Complex'
+        for i in self.values:
+            if isinstance(i[1], (complex)):
+                break
+        else:
+            domain = 'Real'
+            for i in self.values:
+                if not float(i[1]).is_integer():
+                    break
+            else:
+                domain = 'Integer'
+                for i in self.values:
+                    if i[1] < 0:
+                        break
+                else:
+                    domain = 'Natural'
+        return domain
 
     def plot_func(self, ax):
         y_intercept = self(0)
-        ax.scatter(0, y_intercept, color = calculus.Function.function_part['y-intercept'])
+        ax.scatter(0, y_intercept, color= calculus.Function.function_part['y-intercept'])
 
-    def __repr__(self):
+    def __str__(self):
         expression = []
         #TODO algebraic expression
-        for degree, coef in self.__values:
+        for degree, coef in self.values:
             if coef != 0:
                 if degree != 0:
                     s = f'{coef}x^{degree}'
                 else:
                     s = str(coef)
                 expression.append(s)
-        expression = ' + '.join(expression[::-1])
+        expression = ' + '.join(expression)
         return expression
+
+    def __repr__(self):
+        return str(self.coefficients()[0])
+
+def polynomial_addition(p: Polynomial, q: Polynomial) -> Polynomial:
+        mx_d = max_degree(p, q)
+        coefs_p = p.coefficients(mx_d)
+        coefs_q = q.coefficients(mx_d)
+        return Polynomial(*(coefs_p + coefs_q))
+
+def polynomial_product(p: Polynomial, q: Polynomial) -> Polynomial:
+        r = [0] * (p.degree + q.degree + 1)
+        for p_exp, p_coef in p.values:
+            for q_exp, q_coef in q.values:
+                exp = p_exp + q_exp
+                coef = p_coef * q_coef
+                r[exp] += coef
+        return Polynomial(*r[::-1])
+
+def scalar_product(p: Polynomial, n: int) -> Polynomial:
+    return Polynomial(*(p.coefficients() * n))
+
+def polynomial_division():
+    pass
+
+def max_degree(p: Polynomial, q: Polynomial) -> int:
+    return ops.max([len(p), len(q)])

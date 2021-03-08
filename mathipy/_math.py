@@ -3,12 +3,12 @@ import mathipy.numeric_operations as ops
 
 e     = 2.718281828459045
 pi    = 3.141592653589793
-tau   = 2 * pi
-sqrt2 = 2 ** (1/2)
+tau   = 6.2831853071796
+sqrt2 = 1.4142135623731
 phi   = 1.618033988749894
 gamma = 0.577215664901532860
 
-def pascal_triangle(n):
+def pascal_triangle(n: int) -> list:
     if n == 0:
         return []
     elif n == 1:
@@ -23,20 +23,20 @@ def pascal_triangle(n):
         result.append(new_row)
     return result
 
-def abs(n):
-    if isinstance(n, complex):
-        #Since native python complex numbers do not have the module
-        #attribute, it is calculated either if it's complex or mpy.Complex
-        return sqrt((n.real)**2 + (n.imag)**2)
-    elif ops.is_iter(n):
-        return np.array(list(map(abs, n)))
-    else:
-        if n < 0:
-            return -n
+def abs(x):
+    if ops.is_scalar(x):
+        if isinstance(x, complex):
+            #Since native python complex numbers do not have the module
+            #attribute, it is calculated either if it's complex or mpy.Complex
+            return sqrt((x.real)**2 + (x.imag)**2)
+        if x < 0:
+            return -x
         else:
-            return n
+            return x
+    elif ops.is_iter(x):
+        return np.array(list(map(abs, x)))
 
-def summation(f, up_bound, low_bound= 0):
+def summation(f: callable, up_bound: int, low_bound: int= 0) -> float:
     if up_bound < low_bound:
         return 0
     elif up_bound == low_bound:
@@ -44,7 +44,7 @@ def summation(f, up_bound, low_bound= 0):
     else:
         return f(low_bound) + summation(f, up_bound, low_bound + 1)
 
-def product(f, up_bound, low_bound = 1):
+def product(f: callable, up_bound: int, low_bound: int= 0) -> float:
     if up_bound < low_bound:
         return 0
     elif up_bound == low_bound:
@@ -52,20 +52,18 @@ def product(f, up_bound, low_bound = 1):
     else:
         return f(low_bound) * product(f, up_bound, low_bound + 1)
 
-def gcd(a, b):
+def gcd(a: int, b: int) -> int:
     if a % b == 0:
         return b
     else:
         c = a % b
         return gcd(b, c)
 
-def mcm(a, b):
+def mcm(a: int, b: int) -> int:
     d = gcd(a,b)
     return (a * b) // d
 
-#TODO
-#Optimise
-def fibonacci(n):
+def fibonacci(n: int) -> 'generator object':
     a, b = 0, 1
     i = 0
     while i < n:
@@ -163,7 +161,7 @@ def log(x, base= 10):
         log_n = ln(x) / ln(base)
         return ops.round_int(log_n)
 
-def root_n(x, index, return_complex= True):
+def root_n(x, index, return_complex: bool= True):
     if ops.is_iter(x):
         return np.array(list(map(lambda x: root_n(x, index, return_complex), x)))
     if isinstance(x, complex):
@@ -177,5 +175,5 @@ def root_n(x, index, return_complex= True):
             else:
                 return -root_n(-x, index)
 
-def sqrt(x, return_complex= True):
+def sqrt(x, return_complex: bool= True):
     return root_n(x, 2, return_complex)

@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mathipy import numeric_operations as ops 
+import mathipy as mpy
 
 class Function(object):
     function_part = {
@@ -12,11 +12,11 @@ class Function(object):
         'area'        :'purple'
     }
 
-    def __init__(self, f, **kwargs):
+    def __init__(self, f: callable, **kwargs):
         self.function = f
 
-    def calculate_values(self, x):
-        if ops.is_scalar(x):
+    def calculate_values(self, x: (int, iter)):
+        if mpy.is_scalar(x):
             return self.function(x)
         else:
             return list(map(self.function, x))
@@ -42,7 +42,7 @@ class Function(object):
         height = kwargs.get('h', 1)
         v_scale = kwargs.get('vertical_scale', 'relative')
         if v_scale == 'relative':
-            y_min, y_max = ops.min(y) - height, ops.max(y) + height
+            y_min, y_max = mpy.min(y) - height, mpy.max(y) + height
         elif v_scale == 'absolute':
             y_min, y_max = - height / 2, height / 2
 
@@ -74,10 +74,6 @@ class Function(object):
     def derivative(self):
         pass
 
-    @classmethod
-    def doc(cls):
-        print(cls.__doc__)
-
 class Derivative(object):
     """
     Derivative object for Function type objects
@@ -89,3 +85,9 @@ class Integral(object):
     Integral object for Function type objects
     """
     pass
+
+def to_radian(x: float) -> float:
+    return x / 360 * mpy.tau
+
+def to_degree(x: float) -> float:
+    return x / mpy.tau * 360

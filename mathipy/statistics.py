@@ -2,21 +2,27 @@ import matplotlib.pyplot as plt
 from mathipy import numeric_operations as ops
 
 class Statistics(object):
-    def __init__(self, iterable, *args):
+    """
+    Statistics object is used for calculating statistical
+    operations on an iterable object.
+    """
+    def __init__(self, iterable: iter, *args: iter):
         self.iterable = iterable
         if args:
-            self.iterable.extend(args)
+            #Join all args with self.iterable
+            for arg in args:
+                self.iterable.extend(arg)
 
-    def mean(self):
+    def mean(self) -> float:
         return ops.mean(self.iterable)
 
-    def std(self):
+    def std(self) -> float:
         return ops.std(self.iterable)
 
     def median(self):
         return ops.median(self.iterable)
 
-    def mode(self):
+    def mode(self) -> list:
         return ops.mode(self.iterable)
 
     def max(self):
@@ -25,7 +31,7 @@ class Statistics(object):
     def min(self):
         return ops.min(self.iterable)
 
-    def probability_of(self, x):
+    def probability_of(self, x) -> float:
         return ops.probability_of(self.iterable, x)
 
     def __call__(self, x):
@@ -41,7 +47,7 @@ class Statistics(object):
         pos = kwargs.get('pos', self.mean())
         r = kwargs.get('range', 5)
         norm_dist = self.create_ND()
-        norm_dist.plot(pos, r)
+        norm_dist.plot(pos, r, **kwargs)
 
     def plot_hist(self, absolute = False, **kwargs):
         a = kwargs.get('alpha', 1)
@@ -56,5 +62,8 @@ class Statistics(object):
         plt.xlabel('$x$')
         plt.show()
 
-    def __repr__(self):
+    def __str__(self):
         return f'Statistics({self.iterable})'
+
+    def __repr__(self):
+        return str(self)

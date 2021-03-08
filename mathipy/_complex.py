@@ -16,9 +16,7 @@ class Complex(object):
             self.r = x
             self.theta = y
             a = self.r * _math.cos(self.theta)
-            self.a = ops.round_int(a)
             b = self.r * _math.sin(self.theta)
-            self.b = ops.round_int(b)
         
         self.a, self.b, self.r = ops.round_int([self.a, self.b, self.r])
     
@@ -115,8 +113,8 @@ class Complex(object):
         if isinstance(a, complex):
             return _math.e ** (z * _math.ln(a))
         else:
-            x = ops.round_int(_math.cos(_math.ln(a) * z.b))
-            y = ops.round_int(_math.sin(_math.ln(a) * z.b))
+            x = _math.cos(_math.ln(a) * z.b)
+            y = _math.sin(_math.ln(a) * z.b)
             w = Complex(x, y)
             return (a ** z.a) * w
 
@@ -224,26 +222,6 @@ class Complex(object):
         plt.ylim(y_min, y_max)
         plt.show()
 
-    @staticmethod
-    def i(exp):
-        if exp % 4 == 0:
-            return 1
-        elif exp % 4 == 1:
-            return Complex(0,1)
-        elif exp % 4 == 2:
-            return -1
-        elif exp % 4 == 3:
-            return Complex(0,-1)
-
-    @staticmethod
-    def circle_roots(n: int, r= 1):
-        roots = []
-        w = _math.tau / n
-        for k in range(n):
-            theta = w * k
-            roots.append(Complex(r, theta, coordinate='Polar'))
-        return roots
-
     def phase(self):
         if self.a == 0:
             if self.b > 0:
@@ -267,8 +245,8 @@ class Complex(object):
         return f'({self.a} + {self.b}i)'
     
     def __str__(self):
-        return self.cartesian_expression()
         #display(Latex(f'${self.r}  e^{{i {self.theta}}}$'))
+        return self.cartesian_expression()
 
     def __repr__(self):
         return str(self)
@@ -309,3 +287,21 @@ def to_Complex(Z):
         return list(map(f, Z))
     else:
         return Complex(Z.real, Z.imag)
+
+def i(exp: int):
+    if exp % 4 == 0:
+        return Comlplex(1,0)
+    elif exp % 4 == 1:
+        return Complex(0,1)
+    elif exp % 4 == 2:
+        return Complex(-1,0)
+    elif exp % 4 == 3:
+        return Complex(0,-1)
+
+def circle_roots(n: int, r: float= 1) -> list:
+    roots = []
+    w = _math.tau / n
+    for k in range(n):
+        theta = w * k
+        roots.append(Complex(r, theta, coordinate='Polar'))
+    return roots
