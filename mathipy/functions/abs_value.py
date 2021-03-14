@@ -6,49 +6,53 @@ class AbsoluteValue(calculus.Function):
         if a == 0:
             raise ValueError('a term cannot be equal to 0')
         else:
-            self.__a = a
-            self.__b = b
-            self.__h = h
-            self.__x1, self.__x2 = self.__roots = self.find_roots()
+            self.a = a
+            self.b = b
+            self.h = h
+            self.x1, self.x2 = self.roots = self.find_roots()
 
     def get_yint(self):
-        return self.y_intercept
+        return self(0)
 
     def find_roots(self):
-        delta = (-self.__b / self.__a)
+        delta = (-self.b / self.a)
         if delta < 0:
             x1 = x2 = None
         else:
-            x1 =   delta + self.__h
-            x2 = - delta + self.__h
+            x1 =   delta + self.h
+            x2 = - delta + self.h
         return x1, x2
 
     def calculate_values(self, x):
-        y = self.__a * _math.abs(x - self.__h) + self.__b
+        y = self.a * _math.abs(x - self.h) + self.b
         return y
 
     def plot_func(self, ax):
-        y_intercept = self(0)
-        ax.scatter(0, y_intercept, color= calculus.Function.function_part['y-intercept'])
-        if self.__x1 != None and self.__x2 != None:
-            ax.scatter(self.__roots, (0,0), color= calculus.Function.function_part['roots'])
-        ax.scatter(self.__h, self.__b, color= calculus.Function.function_part['vertex'])
+        y_int = self.get_yint()
+        ax.scatter(0, y_int, color= calculus.Function.function_part['y-intercept'])
+        x1, x2 = self.find_roots()
+        if x1 != None and x2 != None:
+            ax.scatter((x1, x2), (0,0), color= calculus.Function.function_part['roots'])
+        ax.scatter(self.h, self.b, color= calculus.Function.function_part['vertex'])
 
     def __call__(self, x):
         return self.calculate_values(x)
 
-    def __repr__(self):
+    def __str__(self):
         representation = ''
-        if self.__a != 1:
-            representation += str(self.__a)
-        if self.__h > 0:
-            representation += f'|x - {self.__h}|'
-        elif self.__h < 0:
-            representation += f'|x + {abs(self.__h)}|'
+        if self.a != 1:
+            representation += str(self.a)
+        if self.h > 0:
+            representation += f'|x - {self.h}|'
+        elif self.h < 0:
+            representation += f'|x + {abs(self.h)}|'
         else:
             representation += f'|x|'
-        if self.__b < 0:
-            representation += f' - {abs(self.__b)}'
-        elif self.__b > 0:
-            representation += f' + {self.__b}'
+        if self.b < 0:
+            representation += f' - {abs(self.b)}'
+        elif self.b > 0:
+            representation += f' + {self.b}'
         return representation
+
+    def __repr__(self):
+        return 'Absolute Value Function'

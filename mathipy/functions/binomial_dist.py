@@ -6,11 +6,11 @@ class BinomialDistribution(calculus.Function):
     def __init__(self, n, p):
         self.n = n
         self.p = p
-        if not 0 <= p <= 1:
+        if not 0 < p < 1:
             raise ValueError('The probability parameter, p, must be between 0 and 1')
     
-    def calculate_values(self, x):
-        c = ops.combinatorial(n = self.n, k = x)
+    def calculate_values(self, x: int):
+        c = ops.combinatorial(n= self.n, k= x)
         y = c * self.p ** (x) * (1 - self.p) ** (self.n - x)
         return y
 
@@ -22,10 +22,13 @@ class BinomialDistribution(calculus.Function):
         c = kwargs.get('c', None)
         plt.xlabel('$x$')
         plt.ylabel('$P(x)$')
-        for i in range(1, self.n):
-            ax.scatter(i, self(i), c = c)
+        for i in range(self.n):
+            ax.scatter(i, self(i), c= c)
         plt.grid()
         plt.show()
 
-    def __repr__(self):
+    def __str__(self):
         return f'X ~ B({self.n}, {self.p})'
+
+    def __repr__(self):
+        return 'Binomial Distribution Function'

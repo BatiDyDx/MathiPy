@@ -2,33 +2,36 @@ from mathipy import calculus
 
 class Linear(calculus.Function):
     function_type = 'Linear'
+
     def __init__(self, a = 1, b = 0):
         if a == 0:
             raise ValueError('a term cannot be equal to 0')
         else:
-            self.__a = a
-            self.__b = b
-            self.__root = -self.__b / self.__a
+            self.a = a
+            self.b = b
 
     def get_yint(self):
-        return self.__b
+        return self.b
+
+    def find_roots(self):
+        return -self.b / self.a
 
     def calculate_values(self, x):
-        y = self.__a * x + self.__b
+        y = self.a * x + self.b
         return y
     
     def plot_func(self, ax):
-        ax.scatter(0, self.__b, c = calculus.Function.function_part['y-intercept'])
-        ax.scatter(self.__root, 0, c = calculus.Function.function_part['roots'])
+        ax.scatter(0, self.b, c= calculus.Function.function_part['y-intercept'])
+        ax.scatter(self.find_roots(), 0, c= calculus.Function.function_part['roots'])
 
     def __call__(self, x):
         y = self.calculate_values(x)
         return y
 
     def __repr__(self):
-        representation = f'{self.__a}x'
-        if self.__b > 0:
-            representation += f' + {self.__b}'
-        if self.__b < 0:
-            representation += f' - {abs(self.__b)}'
+        representation = f'{self.a}x'
+        if self.b > 0:
+            representation += f' + {self.b}'
+        if self.b < 0:
+            representation += f' - {-self.b}'
         return representation

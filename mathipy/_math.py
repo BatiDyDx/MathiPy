@@ -8,6 +8,61 @@ sqrt2 = 1.4142135623731
 phi   = 1.618033988749894
 gamma = 0.577215664901532860
 
+class Infinite(float):
+    def __init__(self, neg = False):
+        self.neg = neg
+
+    def __add__(self, n):
+        return self
+
+    def __radd__(self, n):
+        return self
+
+    def __sub__(self, n):
+        return self
+
+    def __rsub__(self, n):
+        return -self
+
+    def __neg__(self):
+        if self.neg == False:
+            return Infinite(neg = True)
+        else:
+            return Infinite()
+
+    def __mul__(self, n):
+        return self
+
+    def __rmul__(self, n):
+        return self
+
+    def __truediv__(self, n):
+        return self
+
+    def __rtruediv__(self, n):
+        return 0
+
+    def __pow__(self, n):
+        return self
+
+    def __rpow__(self, n):
+        return self
+
+    def __float__(self):
+        if not self.neg:
+            return float('inf')
+        else:
+            return float('-inf')
+
+    def __str__(self):
+        if not self.neg:
+            return 'inf'
+        else:
+            return '-inf'
+
+    def __repr__(self):
+        return str(self)
+
 def pascal_triangle(n: int) -> list:
     if n == 0:
         return []
@@ -22,19 +77,6 @@ def pascal_triangle(n: int) -> list:
         new_row.extend([1])
         result.append(new_row)
     return result
-
-def abs(x):
-    if ops.is_scalar(x):
-        if isinstance(x, complex):
-            #Since native python complex numbers do not have the module
-            #attribute, it is calculated either if it's complex or mpy.Complex
-            return sqrt((x.real)**2 + (x.imag)**2)
-        if x < 0:
-            return -x
-        else:
-            return x
-    elif ops.is_iter(x):
-        return np.array(list(map(abs, x)))
 
 def summation(f: callable, up_bound: int, low_bound: int= 0) -> float:
     if up_bound < low_bound:
@@ -72,98 +114,116 @@ def fibonacci(n: int) -> 'generator object':
     yield a
     yield from fibonacci(n + 1)
 
-def factorial(n):
+@ops.uFunc
+def abs(x):
+    if ops.is_scalar(x):
+        if isinstance(x, complex):
+            #Since native python complex numbers do not have the module
+            #attribute, it is calculated either if it's complex or mpy.Complex
+            return sqrt((x.real)**2 + (x.imag)**2)
+        if x < 0:
+            return -x
+        else:
+            return x
+
+@ops.uFunc
+def factorial(n: int) -> int:
     if n < 0:
         raise ValueError('Cannot calculate factorial of negative numbers')
     if n == 1 or n == 0:
         return 1
     return n * factorial(n - 1)
 
-def sin(x):
-    if ops.is_iter(x):
-        return np.array(list(map(sin, x)))
-    y = (e ** (1j * x) - e ** (-1j * x)) / 2j
-    y = ops.round_int(y)
-    if y.imag == 0:
-        return y.real
-    else:
-        return y
+@ops.uFunc
+def differential(x, magnitude = 10):
+    h = 10 ** -magnitude
+    delta_x = x + x * h
+    return delta_x
 
+@ops.uFunc
+def sin(x):
+    y = (e ** (1j * x) - e ** (-1j * x)) / 2j
+    y = ops.round_if_close(y)
+    if isinstance(x, complex):
+        return y
+    return y.real
+
+@ops.uFunc
 def cos(x):
     return sin(x + pi / 2)
 
+@ops.uFunc
+@ops.handleZeroDivision
 def tan(x):
-    try:
-        return sin(x) / cos(x)
-    except ZeroDivisionError:
-        return None
+    return sin(x) / cos(x)
 
-def sinh(x):
-    if ops.is_iter(x):
-        return np.array(list(map(sin, x)))
-    y = ((e ** x) - (e ** -x)) / 2
-    y = ops.round_int(y)
-    if y.imag == 0:
-        return y.real
-    else:
-        return y
-
+@ops.uFunc
 def cosh(x):
     return cos(x * 1j)
 
+@ops.uFunc
+def sinh(x):
+    y = ((e ** x) - (e ** -x)) / 2
+    y = ops.round_if_close(y)
+    if isinstance(x, complex):
+        return y
+    return y.real
+
+@ops.uFunc
 def tanh(x):
     return sinh(x) / cosh(x)
 
+@ops.uFunc
+@ops.handleZeroDivision
 def cosec(x):
-    try:
-        return 1 / sin(x)
-    except ZeroDivisionError:
-        return None
+    return 1 / sin(x)
 
+@ops.uFunc
+@ops.handleZeroDivision
 def sec(x):
-    try:
-        return 1 / cos(x)
-    except ZeroDivisionError:
-        return None
+    return 1 / cos(x)
 
+@ops.uFunc
+@ops.handleZeroDivision
 def cotan(x):
-    try:
-        return cos(x) / sin(x)
-    except ZeroDivisionError:
-        return None
+    return cos(x) / sin(x)
+
+@ops.uFunc
+@ops.handleZeroDivision
+def cosech(x):
+    return 1 / sinh(x)
+
+@ops.uFunc
+def sech(x):
+    return 1 / cosh(x)
+
+@ops.uFunc
+@ops.handleZeroDivision
+def cotanh(x):
+    return cosh(x) / sinh(x)
 
 import mathipy._complex as C
+@ops.uFunc
 def ln(x):
-    if ops.is_iter(x):
-        return np.array(list(map(ln, x)))
-    elif isinstance(x, complex):
+    if x == 0:
+        return -Infinite()
+    
+    if isinstance(x, complex):
         x = C.to_Complex(x)
         return C.Complex(ln(x.r), x.theta)
-    if x <= 0:
-        raise ValueError('Argument must be positive')
+    elif x < 0:
+        return np.nan
     else:
         return 2 * np.arctanh((x - 1)/(x + 1))
 
+@ops.uFunc
 def log(x, base= 10):
-    if ops.is_iter(x):
-        return np.array(list(map(lambda x: log(x, base), x)))
-    elif isinstance(x, complex):
-        x = C.to_Complex(x)
-        return C.Complex(ln(x.r), x.theta) / ln(base)
-
-    if x <= 0:
-        raise ValueError('Argument must be positive')
-    elif base <= 1:
+    if base.real <= 1 and base.imag == 0:
         raise ValueError('Base must be greater than 1')
-    if base == e:
-        return ln(x)
-    else:
-        log_n = ln(x) / ln(base)
-        return ops.round_int(log_n)
+    return ln(x) / ln(base)
 
+@ops.uFunc
 def root_n(x, index, return_complex: bool= True):
-    if ops.is_iter(x):
-        return np.array(list(map(lambda x: root_n(x, index, return_complex), x)))
     if isinstance(x, complex):
         return x ** (1 / index)
     else:
@@ -171,9 +231,10 @@ def root_n(x, index, return_complex: bool= True):
             return x ** (1 / index)
         else:
             if index % 2 == 0:
-                return C.Complex(0, root_n(-x)) if return_complex else None
+                return C.Complex(0, root_n(-x, index)) if return_complex else np.nan
             else:
                 return -root_n(-x, index)
 
+@ops.uFunc
 def sqrt(x, return_complex: bool= True):
     return root_n(x, 2, return_complex)

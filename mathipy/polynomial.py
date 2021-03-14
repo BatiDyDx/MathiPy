@@ -13,18 +13,13 @@ class Polynomial(calculus.Function):
         while values[0][1] == 0 and len(values) > 1:
             del values[0]
 
-        self.values = ops.round_int(values)
+        self.values = values
         self.degree = len(values) - 1
 
     def __process_coefficents(self, kwargs):
         f = lambda degree: int(re.findall('\d+$', degree)[0])
         listed_coefficients = [[f(degree), coef] for degree, coef in kwargs.items()]
         listed_coefficients.sort(key = lambda a: a[0], reverse=True)
-        listed_coefficients = Polynomial.__complete_coefficients(listed_coefficients)
-        return listed_coefficients
-
-    @staticmethod
-    def __complete_coefficients(listed_coefficients):
         exponents = [n[0] for n in listed_coefficients]
         limit = listed_coefficients[0][0]
         for i in range(limit):
@@ -102,7 +97,7 @@ class Polynomial(calculus.Function):
             if length < len(coefs): raise ValueError('length argument cannot be smaller than polynomial degree')
             while len(coefs) < length:
                 coefs.insert(0, 0)
-        return np.array([coefs])
+        return np.array(coefs)
 
     def __iter__(self):
         return iter(self.coefficients())
@@ -156,7 +151,7 @@ class Polynomial(calculus.Function):
         return expression
 
     def __repr__(self):
-        return str(self.coefficients()[0])
+        return str(self.coefficients())
 
 def polynomial_addition(p: Polynomial, q: Polynomial) -> Polynomial:
         mx_d = max_degree(p, q)

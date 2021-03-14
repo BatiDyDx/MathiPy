@@ -1,21 +1,43 @@
 from functools import wraps
+import numpy as np
 
-def round_int(n: any, thresh_exp: int= 3) -> any:
+def uFunc(f: callable):
+    @wraps(f)
+    def functionWrapper(X, *args, **kwargs):
+        if is_iterable(X):
+            y = map(lambda x: functionWrapper(x, *args, **kwargs), X)
+            y = np.array(list(y))
+            return y
+        else:
+            return f(X, *args, **kwargs)
+    return functionWrapper
+
+def kwargsParser(kwargs: dict, p: tuple, r=None):
+    dft = None
+    for parameter in p:
+        value = kwargs.get(parameter, dft)
+        if value is not dft:
+            return value
+        continue
+    return r
+
+@uFunc
+def round_if_close(n: any, thresh_exp: int= 3) -> any:
+    """Round int doc"""
     floor_thresh = 1 * (10 ** -thresh_exp)
     ceil_thresh = 1 - floor_thresh
     if isinstance(n, complex):
-        t = type(n)
-        return t(round_int(n.real, thresh_exp), round_int(n.imag, thresh_exp))
-    elif is_iter(n):
-        return list(map(lambda n: round_int(n, thresh_exp), n))
+        from mathipy import Complex
+        x = Complex(round_if_close(n.real, thresh_exp), round_if_close(n.imag, thresh_exp))
+        return x
     if n >= 0:
         if n % 1 >= ceil_thresh or n % 1 <= floor_thresh:
-            return int(round(n))
+            return float(round(n))
         else: return n
     elif n < 0:
-        return -round_int(-n)
+        return -round_if_close(-n)
 
-def is_iter(it: any, exclude= None) -> bool:
+def is_iterable(it: any, exclude= None) -> bool:
     if hasattr(it, '__iter__'):
         if exclude:
             if isinstance(it, exclude):
@@ -25,9 +47,19 @@ def is_iter(it: any, exclude= None) -> bool:
     else: return False
 
 def is_scalar(a: any) -> bool:
-    return isinstance(a, (int, float, complex))
+    types = (int, float, complex, np.integer, np.floating, np.complexfloating)
+    return isinstance(a, types)
 
 from mathipy import _math
+def handleZeroDivision(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except ZeroDivisionError:
+            return _math.Infinite()
+    return wrapper
+
 def variation(n: int, k: int, repetitions: bool= False) -> int:
     if not k <= n: raise ValueError('k must be less than n')
     if repetitions:
@@ -106,9 +138,12 @@ def mode(args) -> list:
     return modes
 
 @configIter
-def probability_of(args, x) -> float:
+def frequency(args, x, f_type='absolute'):
     count = args.count(x)
-    return count / len(args)
+    if f_type == 'absolute':
+        return count
+    elif f_type == 'relative':
+        return count / len(args)
 
 @configIter
 def std(args) -> float:

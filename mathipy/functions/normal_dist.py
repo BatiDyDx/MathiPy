@@ -19,5 +19,8 @@ class NormalDistribution(calculus.Function):
     def __call__(self, x):
         return self.calculate_values(x)
 
-    def __repr__(self):
+    def __str__(self):
         return f'Normal Distribution(mu = {self.mu}, sigma = {self.sigma})'
+
+    def __repr__(self):
+        return 'Normal Distribution Function'

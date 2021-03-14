@@ -1,27 +1,13 @@
-# from mathipy.functions import (
-#     abs_value,
-#     binomial_dist,
-#     complex_function,
-#     exponential,
-#     linear,
-#     logarithmic,
-#     normal_dist,
-#     nroot,
-#     quadratic,
-#     rational,
-#     trigonometric,
-# )
-from mathipy.functions.abs_value import AbsoluteValue
-from mathipy.functions.binomial_dist import BinomialDistribution
-from mathipy.functions.complex_function import Complex_Function
-from mathipy.functions.exponential import Exponential
-from mathipy.functions.linear import Linear
-from mathipy.functions.logarithmic import Log
-from mathipy.functions.normal_dist import NormalDistribution
-from mathipy.functions.nroot import NRoot
-from mathipy.functions.quadratic import Quadratic
-from mathipy.functions.rational import Rational
-from mathipy.functions.trigonometric import Cos, Sin, Tan
+from .abs_value import AbsoluteValue
+from .binomial_dist import BinomialDistribution
+from .complex_function import Complex_Function
+from .exponential import Exponential
+from .linear import Linear
+from .logarithmic import Log
+from .normal_dist import NormalDistribution
+from .nroot import NRoot
+from .quadratic import Quadratic, quadratic_roots
+from .rational import Rational
 
 __all__ = [
     'abs_value',

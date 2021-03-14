@@ -6,20 +6,22 @@ from mathipy import numeric_operations as ops
 
 class Complex(object):
     __class__ = complex
-    def __init__(self, x, y, coordinate = 'Cartesian'):
-        if coordinate == 'Cartesian':
-            self.a = x
-            self.b = y
+    def __init__(self, *args, **kwargs):
+        if args:
+            if len(args) == 1 and isinstance(args[0], complex):
+                self.a, self.b = args[0].real, args[0].imag
+            elif len(args) == 2:    
+                self.a, self.b = args
+            
             self.r = _math.sqrt(self.a**2 + self.b**2)
             self.theta = self.phase()
-        elif coordinate == 'Polar':
-            self.r = x
-            self.theta = y
-            a = self.r * _math.cos(self.theta)
-            b = self.r * _math.sin(self.theta)
         
-        self.a, self.b, self.r = ops.round_int([self.a, self.b, self.r])
-    
+        elif 'r' in kwargs and 'arg' in kwargs:
+            self.r = kwargs['r']
+            self.theta = kwargs['arg']
+            self.a = self.r * _math.cos(self.theta)
+            self.b = self.r * _math.sin(self.theta)
+
     @property
     def real(self):
         return self.a
@@ -160,11 +162,11 @@ class Complex(object):
             roots = []
             theta_n = tuple((self.theta + _math.tau * k) / n for k in range(n))
             for theta in theta_n:
-                roots.append(Complex(r, theta, coordinate='Polar'))
+                roots.append(Complex(r=r, arg=theta))
             return roots
         else:
             theta = self.theta / n
-            return Complex(r, theta, coordinate='Polar')
+            return Complex(r=r, arg=theta)
 
     def conjugate(self):
         return Complex(self.real, -self.imag)
@@ -249,44 +251,34 @@ class Complex(object):
         return self.cartesian_expression()
 
     def __repr__(self):
-        return str(self)
+        sign = '+' if self.b >= 0 else '-'
+        return f'{self.a}{sign}{abs(self.b)}i'
 
-def real(Z):
-    if ops.is_scalar(Z):
-        return Z.real
-    elif ops.is_iter(Z):
-        return np.array(list(map(real, Z)))
+@ops.uFunc
+def real(z):
+    return z.real
 
-def imag(Z):
-    if ops.is_scalar(Z):
-        return Z.imag
-    elif ops.is_iter(Z):
-        return np.array(list(map(imag, Z)))
+@ops.uFunc
+def imag(z):
+    return z.imag
 
-def module(Z):
-    if ops.is_scalar(Z):
-        try:
-            return Z.mod
-        except AttributeError:
-            return Complex(Z.real, Z.imag).mod
-    elif ops.is_iter(Z):
-        return np.array(list(map(module, Z)))
+@ops.uFunc
+def module(z):
+    try:
+        return z.mod
+    except AttributeError:
+        return Complex(z.real, z.imag).mod
 
-def argument(Z):
-    if ops.is_scalar(Z):
-        try:
-            return Z.arg
-        except AttributeError:
-            return Complex(Z.real, Z.imag).arg
-    elif ops.is_iter(Z):
-        return np.array(list(map(argument, Z)))
+@ops.uFunc
+def argument(z):
+    try:
+        return z.arg
+    except AttributeError:
+        return Complex(z.real, z.imag).arg
 
-def to_Complex(Z):
-    if ops.is_iter(Z):
-        f = lambda z: to_Complex(z)
-        return list(map(f, Z))
-    else:
-        return Complex(Z.real, Z.imag)
+@ops.uFunc
+def to_Complex(z):
+    return Complex(z.real, z.imag)
 
 def i(exp: int):
     if exp % 4 == 0:
@@ -303,5 +295,5 @@ def circle_roots(n: int, r: float= 1) -> list:
     w = _math.tau / n
     for k in range(n):
         theta = w * k
-        roots.append(Complex(r, theta, coordinate='Polar'))
+        roots.append(Complex(r=r, arg=theta))
     return roots

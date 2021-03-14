@@ -24,16 +24,23 @@ from ._complex import (
 
 from ._math import (
     abs,
-    cos, 
+    cos,
+    cosec,
+    cosech,
+    cotan,
+    cotanh,
     cosh,
     e,
     factorial,
     gamma,
+    Infinite,
     ln,
     log, 
     phi,
     pi, 
     root_n,
+    sec,
+    sech,
     sin, 
     sinh,
     sqrt,
@@ -58,11 +65,9 @@ from .algebra import (
 
 from .arithmetic import (
     addition,
-    Infinite,
     multiplication,
     power,
     Variable,
-    Undefined
 )
 
 from .calculus import Function, to_degree, to_radian
@@ -78,17 +83,14 @@ from .datastr import (
 from .functions import (
     AbsoluteValue,
     BinomialDistribution,
-    Cos,
     Complex_Function,
     Exponential,
     Linear,
     Log,
     NormalDistribution,
     NRoot,
-    Quadratic,
+    Quadratic, quadratic_roots,
     Rational,
-    Sin,
-    Tan
 )
 
 from .linalg import (
@@ -119,15 +121,17 @@ from .numeric_operations import (
     mean,
     min,
     mode,
-    probability_of,
+    frequency,
     std,
     median,
-    round_int,
+    round_if_close,
     is_scalar,
-    is_iter,
+    is_iterable,
     variation,
     permutation,
     combinatorial,
+    uFunc,
+    kwargsParser,
 )
 
 from .polynomial import (
@@ -139,11 +143,15 @@ from .polynomial import (
     max_degree
 )
 
+from .science import c, H, ket, time_dilation
+
 from .statistics import Statistics
+
+from .testing import test_time
 
 #TODO
 #Add all objects to be imported when importing *
 __all__ = [
     '_complex', '_math', 'arithmetic', 'functions', 'calculus', 'datastr', 'linalg', 'numeric_operations',
-    'polynomial', 'statistics', 'Vector', 'Complex', 'Infinite', 'Undefined', 'Variable'
+    'polynomial', 'statistics', 'Vector', 'Complex', 'Infinite', 'Variable'
     ]

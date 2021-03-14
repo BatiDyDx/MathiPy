@@ -128,6 +128,9 @@ class Matrix(Tensor):
         if len(self.shape) != Matrix.rank:
             raise TypeError(f'Matrix shape must be of length 2, received {self.shape}')
 
+    def change_dtype(self, dtype):
+        self.elements = self.elements.astype(dtype)
+
     @property
     def adj(self):
         return adjoint(self)
@@ -155,7 +158,7 @@ class Matrix(Tensor):
             t = 0
             for i in range(self.m_dimension):
                 t += self[i][i]
-            return ops.round_int(t)
+            return t
 
     @property
     def is_hermitian(self):

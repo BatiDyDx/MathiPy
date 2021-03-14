@@ -31,11 +31,11 @@ class Statistics(object):
     def min(self):
         return ops.min(self.iterable)
 
-    def probability_of(self, x) -> float:
-        return ops.probability_of(self.iterable, x)
+    def frequency(self, x, f_type) -> float:
+        return ops.frequency(self.iterable, x, f_type)
 
     def __call__(self, x):
-        return self.probability_of(x)
+        return self.frequency(x, f_type= 'relative')
 
     def create_ND(self):
         import mathipy.functions.normal_dist as nd   
