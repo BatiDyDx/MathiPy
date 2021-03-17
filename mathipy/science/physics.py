@@ -1,24 +1,48 @@
-import numpy as np
-from mathipy._math import differential
+from mathipy._math import differential, sqrt
+from mathipy.linalg import Matrix
 
-c = 3e8
+###Constants########################
+c     = 299792458             #m / s | relativistic speed of light
+G     = 6.6743015e-11         #metres^3 / (kg * s) | Newtonian constant of gravitation
+k     = 8.987551792314e9      #N * m^2 / C^2 | Coulomb constant
+q_e   = 1.602176634e-19       #C | elementary charge
+alpha = 7.297352569311e-3     #finite structure
+####################################
 
-def d(x, t):
-    return np.sqrt(c ** 2 * t ** 2 - x ** 2)
+minkowski_metric = Matrix([
+    [ 1,  0,  0,  0],
+    [ 0, -1,  0,  0],
+    [ 0,  0, -1,  0],
+    [ 0,  0,  0, -1],
+])
 
-def time_dilation(x, t):
-    v = x/t
-    tau = d(x, t)
+def distance(x: tuple, g=minkowski_metric):
+    dist = 0
+    for i in range(g.m_dimension):
+        for j in range(g.n_dimension):
+            dist += g[i, j] * x[i] * x[j]
+    return sqrt(dist)
+
+def time_dilation(x: tuple):
+    """
+    time must be measured in lightseconds. To achieve this
+    multiply time by c:
+
+    >>> time(seconds) * c(metres / seconds) = light_seconds(metres)
+    """
+    tau = distance(x)
+    t, *D = x
+    v = sqrt(sum(map(lambda d: d ** 2, D))) / t
     try:
-        vt = c * differential(t) / differential(tau)
-        vt = np.round(vt, decimals = 15)
+        vt = differential(t) / differential(tau)
     except ZeroDivisionError:
         vt = float('inf')
 
     vx = v * vt
-    velocity = np.sqrt(c ** 2 * vt ** 2 - vx ** 2)
+    velocity = sqrt(c ** 2 * vt ** 2 - vx ** 2)
 
-    print('vt is equal to: ', vt)
-    print('Tau in light meters is: ', tau)
-    print('Tau in seconds is: ', tau / c)
+    print('vx is: ', vx)
+    print('velocity is: ', velocity)
+
+    return vt
 

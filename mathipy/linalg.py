@@ -13,14 +13,16 @@ class Tensor():
 
 class Vector(Tensor):
     rank = 1
-    
-    def __init__(self, args): 
-        self.elements = np.array(list(args))
-        self.dimension = len(self.elements)
+    def __init__(self, elements): 
+        self.elements = np.array(elements)
+        
+        if self.elements.shape[0] > 1 or len(self.elements.shape) != 2:
+            raise TypeError(f'Vector input must be a one dimensional array, received {self.elements.shape}')
+        
+        self.dimension = self.elements.shape[1]
         self.module = mpy.sqrt(sum(map(lambda v: v**2, self.elements)))
         self.field = 'Complex' if np.issubdtype(self.elements.dtype, np.complex_) else 'Real'
-        if len(self.elements.shape) > 1:
-            raise TypeError(f'Vector input must be a one dimensional array, received {self.elements.shape}')
+    
     @property
     def T(self):
         return transpose(self)
@@ -30,6 +32,7 @@ class Vector(Tensor):
             return vector_addition(v, u)
         elif isinstance(u, Matrix):
             return u.__radd__(v)
+        raise TypeError(f'Vector addition is not supported between Vector and {type(u)}')
 
     def __sub__(v, u):
         if isinstance(u, Vector):
@@ -44,28 +47,34 @@ class Vector(Tensor):
         if isinstance(u, Tensor):
             if isinstance(u, Vector):
                 return dot_product(v, u)
-            elif isinstance(u, Matrix):
+            else:
                 return u.__rmul__(v)
-        elif ops.is_scalar(u):
+        else:
             return Vector(v.elements * u)
 
     def __rmul__(v, n):
         return v.__mul__(n)
 
+    def __truediv__(v, n):
+        return v.__mul__(1 / n)
+
     def __matmul__(v, u):
         if isinstance(u, Vector):
             return tensor_product(v, u)
         elif isinstance(u, Matrix):
-            return u.__rmatmul__(v)
+            return Vector(u.__rmatmul__(v).elements)
 
     def __abs__(self):
         return self.module
 
+    def __len__(self):
+        return self.dimension
+
     def __iter__(self):
-        return iter(self.elements)
+        return iter(self.elements.flatten())
 
     def __getitem__(self, index):
-        return self.elements[index]
+        return self.elements[0][index]
 
     def to_matrix(self):
         return Matrix(self.elements)
@@ -119,7 +128,6 @@ class Vector(Tensor):
 
 class Matrix(Tensor):
     rank = 2
-
     def __init__(self, elements):
         self.elements = np.array(elements)
         self.m_dimension, self.n_dimension = self.shape = self.elements.shape
@@ -188,13 +196,13 @@ class Matrix(Tensor):
             if isinstance(B, Vector):
                 B = B.to_matrix()
             return matrix_addition(A, B)
+        else: raise TypeError(f'Addition is only supported between Tensor instances, received {type(B)}')
 
     def __radd__(A, B):
         return A.__add__(B)
 
     def __sub__(A, B):
-        if isinstance(B, Tensor):
-            return A + (-B)
+        return A + (-B)
 
     def __rsub__(A, B):
         return (-A).__add__(B)
@@ -219,7 +227,7 @@ class Matrix(Tensor):
                 B = B.to_matrix()
             return matrix_product(A, B)
         else:
-            raise TypeError(f'Matrix product is only supported between tensor instances, received {type(u)}')
+            raise TypeError(f'Matrix product is only supported between tensor instances, received {type(B)}')
 
     def __rmatmul__(A, B):
         if isinstance(B, Vector):
@@ -228,14 +236,13 @@ class Matrix(Tensor):
     def __truediv__(A, B):
         if ops.is_scalar(B):
             return A * (1 / B)
-        elif isinstance(B, Tensor):
-            return A * (B ** -1)
+        elif isinstance(B, Matrix):
+            return A @ (B ** -1)
         else:
             return B.__rtruediv__(A)
 
     def __rtruediv__(A, B):
-        if ops.is_scalar(B):
-            return (A ** -1) * B
+        return (A ** -1) * B
 
     def __pow__(self, n):
         if not isinstance(n, int):
@@ -243,22 +250,21 @@ class Matrix(Tensor):
         if n == 1 or n == 0:
             return self
         elif n > 1:
-            return self @ self ** (n - 1)
+            return self @ (self ** (n - 1))
         else:
             return self.inv ** (-n)
 
     def __eq__(A, B):
         return np.array_equal(A.elements, B.elements)
 
+    def __len__(self):
+        return self.m_dimension
+
     def __iter__(self):
         return iter(self.elements)
 
     def __getitem__(self, index):
-        if isinstance(index, tuple):
-            index, col = index
-            return [i[col] for i in self.elements[index]]
-        else:
-            return self.elements[index]
+        return self.elements[index]
 
     def __setitem__(self, index, value):
         m, n = index
@@ -298,7 +304,7 @@ def tensor_product(v: Vector, u: Vector):
     for i in v:
         for j in u:
             w.append(i * j)
-    return Vector(w)
+    return Vector([w])
 
 def matrix_addition(A: Matrix, B: Matrix) -> Matrix:
     if A.shape == B.shape:
@@ -319,11 +325,11 @@ def matrix_product(A: Matrix, B: Matrix) -> Matrix:
         return Matrix(A.elements @ B.elements)
     else: 
         raise ValueError(
-                    f"First matrix n-dimension must be equal to second matrix m-dimension. Received {A.n_dimension} and {B.m_dimension}"
+            f"First matrix n-dimension must be equal to second matrix m-dimension. Received {A.n_dimension} and {B.m_dimension}"
         )
 
 def transpose(A: Matrix):
-    return A.elements.T
+    return Matrix(A.elements.T)
 
 def determinant(A: Matrix) -> float:
     if A.is_square:

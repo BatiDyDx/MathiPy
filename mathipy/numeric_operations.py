@@ -1,16 +1,29 @@
 from functools import wraps
 import numpy as np
 
-def uFunc(f: callable):
-    @wraps(f)
-    def functionWrapper(X, *args, **kwargs):
-        if is_iterable(X):
-            y = map(lambda x: functionWrapper(x, *args, **kwargs), X)
-            y = np.array(list(y))
-            return y
-        else:
-            return f(X, *args, **kwargs)
-    return functionWrapper
+def uFunc(f: callable= None, iterable_input= False):
+    def decorator(f):
+        @wraps(f)
+        def functionWrapper(X, *args, **kwargs):
+            if is_iterable(X):
+                y = map(lambda x: functionWrapper(x, *args, **kwargs), X)
+                y = np.array(list(y))
+                return y
+            else:
+                return f(X, *args, **kwargs)
+        return functionWrapper
+    if f is None:
+        if iterable_input:
+            def decorator(f):
+                @wraps(f)
+                def functionWrapper(X, *args, **kwargs):
+                    y = map(lambda x: f(x, *args, **kwargs), X)
+                    y = np.array(list(y))
+                    return y
+                return functionWrapper
+        return decorator
+    else:
+        return decorator(f)
 
 def kwargsParser(kwargs: dict, p: tuple, r=None):
     dft = None

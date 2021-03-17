@@ -32,6 +32,3 @@ def setIsContained(A: iter, B: iter, eq: bool= True) -> bool:
 
 def setContains(A: iter, B: iter, eq: bool= True) -> bool:
     return setIsContained(B, A, eq)
-
-def ruffini(x):
-    pass
