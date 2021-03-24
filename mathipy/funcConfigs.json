@@ -1,0 +1,30 @@
+{
+    "functions": {
+        "sin"       : "Trigonometric sine Universal Function. Accepts complex numbers.",
+        "cos"       : "Trigonometric cosine Universal Function. Accepts complex numbers.",
+        "tan"       : "Trigonometric tangent Universal Function. Accepts complex numbers.",
+        "ln"        : "Natural logarithm Universal Function.",
+        "log"       : "Logarithm Universal Function. Takes base [defaults to 10] as keyword argument.",
+        "srqt"      : "Square root Universal Function. Takes return_complex (bool) as keyword argument.",
+        "root_n"     : "Root N Universal Function. Takes index and return_complex (bool) as keyword arguments.",
+        "factorial" : "Factorial Universal Function. Input must be an int.",
+        "abs"       : "Absolute Value Universal Function. Accepts complex numbers.",
+        "gcd"       : "Greatest Common Divisor function.",
+        "lcm"       : "Least Common Multiple function.",
+        "sinh"      : "Hyperbolic sine Universal Function. Accepts complex numbers.",
+        "cosh"      : "Hyperbolic cosine Universal Function. Accepts complex numbers.",
+        "tanh"      : "Hyperbolic tangent Universal Function. Accepts complex numbers.",
+        "permutation" : "Group Theory permutation function. Input must be an int. Takes an k (int) and circular (bool) as keyword arguments.",
+        "combinatorial": "Group Theory combinatorial function. Inputs must be integers. Takes repetitions (bool) as keyword arguments.",
+        "variation"    : "Group Theory variation function. Input must be integers. Takes repetitions (bool) as keyword arguments."
+    },
+    
+    "constants": [
+        "pi"   ,
+        "e"    ,
+        "phi"  ,
+        "gamma",
+        "sqrt2",
+        "tau"
+    ]
+}

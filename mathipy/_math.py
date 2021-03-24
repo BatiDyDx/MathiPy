@@ -1,5 +1,6 @@
 import numpy as np
 import mathipy.numeric_operations as ops
+from functools import cache, lru_cache
 
 e     = 2.718281828459045
 pi    = 3.141592653589793
@@ -63,6 +64,7 @@ class Infinite(float):
     def __repr__(self):
         return str(self)
 
+@lru_cache(maxsize=5)
 def pascal_triangle(n: int) -> list:
     if n == 0:
         return []
@@ -94,6 +96,7 @@ def product(f: callable, up_bound: int, low_bound: int= 0) -> float:
     else:
         return f(low_bound) * product(f, up_bound, low_bound + 1)
 
+@np.vectorize
 def gcd(a: int, b: int) -> int:
     if a % b == 0:
         return b
@@ -101,10 +104,12 @@ def gcd(a: int, b: int) -> int:
         c = a % b
         return gcd(b, c)
 
-def mcm(a: int, b: int) -> int:
+@np.vectorize
+def lcm(a: int, b: int) -> int:
     d = gcd(a,b)
     return (a * b) // d
 
+@cache
 def fibonacci(n: int) -> 'generator object':
     a, b = 0, 1
     i = 0
@@ -114,7 +119,7 @@ def fibonacci(n: int) -> 'generator object':
     yield a
     yield from fibonacci(n + 1)
 
-@ops.uFunc
+@np.vectorize
 def abs(x):
     if ops.is_scalar(x):
         if isinstance(x, complex):
@@ -126,21 +131,20 @@ def abs(x):
         else:
             return x
 
-@ops.uFunc
+@np.vectorize
+@cache
 def factorial(n: int) -> int:
     if n < 0:
         raise ValueError('Cannot calculate factorial of negative numbers')
-    if n == 1 or n == 0:
-        return 1
-    return n * factorial(n - 1)
+    return factorial(n - 1) * n if n else 1
 
-@ops.uFunc
+@np.vectorize
 def differential(x, magnitude = 10):
     h = 10 ** -magnitude
     delta_x = x + x * h
     return delta_x
 
-@ops.uFunc
+@np.vectorize
 def sin(x):
     y = (e ** (1j * x) - e ** (-1j * x)) / 2j
     y = ops.round_if_close(y)
@@ -148,20 +152,20 @@ def sin(x):
         return y
     return y.real
 
-@ops.uFunc
+@np.vectorize
 def cos(x):
     return sin(x + pi / 2)
 
-@ops.uFunc
+@np.vectorize
 @ops.handleZeroDivision
 def tan(x):
     return sin(x) / cos(x)
 
-@ops.uFunc
+@np.vectorize
 def cosh(x):
     return cos(x * 1j)
 
-@ops.uFunc
+@np.vectorize
 def sinh(x):
     y = ((e ** x) - (e ** -x)) / 2
     y = ops.round_if_close(y)
@@ -169,41 +173,41 @@ def sinh(x):
         return y
     return y.real
 
-@ops.uFunc
+@np.vectorize
 def tanh(x):
     return sinh(x) / cosh(x)
 
-@ops.uFunc
+@np.vectorize
 @ops.handleZeroDivision
 def cosec(x):
     return 1 / sin(x)
 
-@ops.uFunc
+@np.vectorize
 @ops.handleZeroDivision
 def sec(x):
     return 1 / cos(x)
 
-@ops.uFunc
+@np.vectorize
 @ops.handleZeroDivision
 def cotan(x):
     return cos(x) / sin(x)
 
-@ops.uFunc
+@np.vectorize
 @ops.handleZeroDivision
 def cosech(x):
     return 1 / sinh(x)
 
-@ops.uFunc
+@np.vectorize
 def sech(x):
     return 1 / cosh(x)
 
-@ops.uFunc
+@np.vectorize
 @ops.handleZeroDivision
 def cotanh(x):
     return cosh(x) / sinh(x)
 
 import mathipy._complex as C
-@ops.uFunc
+@np.vectorize
 def ln(x):
     if x == 0:
         return -Infinite()
@@ -216,13 +220,13 @@ def ln(x):
     else:
         return 2 * np.arctanh((x - 1)/(x + 1))
 
-@ops.uFunc
+@np.vectorize
 def log(x, base= 10):
     if base.real <= 1 and base.imag == 0:
         raise ValueError('Base must be greater than 1')
     return ln(x) / ln(base)
 
-@ops.uFunc
+@np.vectorize
 def root_n(x, index, return_complex: bool= True):
     if isinstance(x, complex):
         return x ** (1 / index)
@@ -235,6 +239,6 @@ def root_n(x, index, return_complex: bool= True):
             else:
                 return -root_n(-x, index)
 
-@ops.uFunc
+@np.vectorize
 def sqrt(x, return_complex: bool= True):
     return root_n(x, 2, return_complex)

@@ -1,30 +1,6 @@
 from functools import wraps
 import numpy as np
 
-def uFunc(f: callable= None, iterable_input= False):
-    def decorator(f):
-        @wraps(f)
-        def functionWrapper(X, *args, **kwargs):
-            if is_iterable(X):
-                y = map(lambda x: functionWrapper(x, *args, **kwargs), X)
-                y = np.array(list(y))
-                return y
-            else:
-                return f(X, *args, **kwargs)
-        return functionWrapper
-    if f is None:
-        if iterable_input:
-            def decorator(f):
-                @wraps(f)
-                def functionWrapper(X, *args, **kwargs):
-                    y = map(lambda x: f(x, *args, **kwargs), X)
-                    y = np.array(list(y))
-                    return y
-                return functionWrapper
-        return decorator
-    else:
-        return decorator(f)
-
 def kwargsParser(kwargs: dict, p: tuple, r=None):
     dft = None
     for parameter in p:
@@ -34,13 +10,14 @@ def kwargsParser(kwargs: dict, p: tuple, r=None):
         continue
     return r
 
-@uFunc
+@np.vectorize
 def round_if_close(n: any, thresh_exp: int= 3) -> any:
     """Round int doc"""
-    floor_thresh = 1 * (10 ** -thresh_exp)
+    floor_thresh = 10.0 ** -thresh_exp
     ceil_thresh = 1 - floor_thresh
     if isinstance(n, complex):
         from mathipy import Complex
+        #x = Complex(round_if_close(n.real, thresh_exp), round_if_close(n.imag, thresh_exp))
         x = Complex(round_if_close(n.real, thresh_exp), round_if_close(n.imag, thresh_exp))
         return x
     if n >= 0:
@@ -48,7 +25,7 @@ def round_if_close(n: any, thresh_exp: int= 3) -> any:
             return float(round(n))
         else: return n
     elif n < 0:
-        return -round_if_close(-n)
+        return -round_if_close(-n, thresh_exp)
 
 def is_iterable(it: any, exclude= None) -> bool:
     if hasattr(it, '__iter__'):
@@ -73,6 +50,7 @@ def handleZeroDivision(f):
             return _math.Infinite()
     return wrapper
 
+@np.vectorize
 def variation(n: int, k: int, repetitions: bool= False) -> int:
     if not k <= n: raise ValueError('k must be less than n')
     if repetitions:
@@ -80,6 +58,7 @@ def variation(n: int, k: int, repetitions: bool= False) -> int:
     else:
         return _math.factorial(n) // _math.factorial(n - k)
 
+@np.vectorize
 def permutation(n: int, k: (int, None)= None, circular: bool= False) -> int:
     if not k:
         if not circular: return _math.factorial(n) 
@@ -90,6 +69,7 @@ def permutation(n: int, k: (int, None)= None, circular: bool= False) -> int:
             denominator *= _math.factorial(el)
         return _math.factorial(n) // denominator
 
+@np.vectorize
 def combinatorial(n: int, k: int, repetitions: bool= False) -> int:
     if not repetitions:
         if k >= n: raise ValueError('n must be greater than p')
@@ -108,7 +88,7 @@ def configIter(f: callable) -> callable:
     return iterWrapper
 
 @configIter
-def min(args) -> any:
+def min(args):
     """
     Return the minimum value of a series of iterable objects
     """
@@ -119,7 +99,7 @@ def min(args) -> any:
     return min_n
 
 @configIter
-def max(args) -> any:
+def max(args):
     max_n = float('-inf')
     for i in args:
         if i == None: pass
@@ -127,7 +107,7 @@ def max(args) -> any:
     return max_n
 
 @configIter
-def mean(args) -> float:
+def mean(args):
     """
     Return the mean of a series of iterable objects
     """

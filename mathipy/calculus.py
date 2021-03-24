@@ -16,10 +16,8 @@ class Function(object):
         self.function = f
 
     def calculate_values(self, x):
-        @ops.uFunc
-        def f(x):
-            return self.function(x)
-        return f(x)
+        vfunc = np.vectorize(self.function)
+        return vfunc(x)
 
     def __call__(self, x):
         return self.calculate_values(x)
@@ -69,8 +67,10 @@ class Function(object):
     def plot_func(self, ax):
         ax.scatter(0, self.get_yint(), color= Function.function_part['y-intercept'])
 
+@np.vectorize
 def to_radian(x: float) -> float:
     return x / 360 * _math.tau
 
+@np.vectorize
 def to_degree(x: float) -> float:
     return x / _math.tau * 360

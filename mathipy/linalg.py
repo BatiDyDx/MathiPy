@@ -9,7 +9,9 @@ class Tensor():
     Vector or Matrix
 
     """
-    pass
+    def map(self, f, *args, **kwargs):
+        vfunc = np.vectorize(f)
+        self.elements = vfunc(self.elements, *args, **kwargs)
 
 class Vector(Tensor):
     rank = 1

@@ -254,29 +254,29 @@ class Complex(object):
         sign = '+' if self.b >= 0 else '-'
         return f'{self.a}{sign}{abs(self.b)}i'
 
-@ops.uFunc
+@np.vectorize
 def real(z):
     return z.real
 
-@ops.uFunc
+@np.vectorize
 def imag(z):
     return z.imag
 
-@ops.uFunc
+@np.vectorize
 def module(z):
     try:
         return z.mod
     except AttributeError:
         return Complex(z.real, z.imag).mod
 
-@ops.uFunc
+@np.vectorize
 def argument(z):
     try:
         return z.arg
     except AttributeError:
         return Complex(z.real, z.imag).arg
 
-@ops.uFunc
+@np.vectorize
 def to_Complex(z):
     return Complex(z.real, z.imag)
 

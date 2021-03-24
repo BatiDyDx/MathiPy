@@ -1,3 +1,5 @@
+__version__ = '0.1dev'
+
 from . import (
     _complex,
     _math,
@@ -51,7 +53,7 @@ from ._math import (
     product,
     summation,
     gcd,
-    mcm,
+    lcm,
 )
 #TODO   
 #Add algebra
@@ -130,7 +132,6 @@ from .numeric_operations import (
     variation,
     permutation,
     combinatorial,
-    uFunc,
     kwargsParser,
 )
 
