@@ -1,5 +1,6 @@
 from mathipy.datastr import Tree
 
+
 class BinaryTree(Tree):
     def __init__(self, data):
         self.data = data

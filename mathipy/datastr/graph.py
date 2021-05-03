@@ -1,6 +1,7 @@
 class Graph(object):
     pass
 
+
 class Node(Graph):
     def __init__(self, node_value):
         self.node_value = node_value

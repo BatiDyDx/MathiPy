@@ -17,6 +17,7 @@ class Stack:
     def __repr__(self):
         return str(self)
 
+
 class Queue:
     def __init__(self, *args):
         self.elements = list(args)

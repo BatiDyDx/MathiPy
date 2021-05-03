@@ -4,7 +4,7 @@ import json
 import pathlib
 import argparse
 
-PATH = pathlib.Path(__file__).parent
+PATH = pathlib.Path().parent
 
 with open(PATH / 'funcConfigs.json', 'r') as file:
     jsonFile  = json.load(file)

@@ -2,28 +2,30 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mathipy as mpy
 from mathipy import calculus
+from typing import Callable
 
-class Complex_Function(calculus.Function):
-    def __init__(self, f):
+
+class ComplexFunction(calculus.Function):
+    function_type = 'Complex'
+
+    def __init__(self, f: Callable[[complex], complex]):
         self.f = f
 
-    def calculate_values(self, z):
-        if mpy.is_scalar(z):
-            return self.f(z)
-        else:
-            return list(map(self.calculate_values, z))
+    def calculate_values(self, z: complex) -> complex:
+        vfunc = np.vectorize(self.f)
+        return vfunc(z)
 
-    def __call__(self, z):
+    def __call__(self, z) -> complex:
         return self.calculate_values(z)
 
-    def plot(self, plot_type='conformal_map', pos=(0,0), rnge=(5,5), **kwargs):
-        x_min, x_max = pos[0] - rnge[0], pos[0] + rnge[0]
-        y_min, y_max = pos[1] - rnge[1], pos[1] + rnge[1]
-        s = kwargs.get('step', 100)
+    def plot(self, plot_type='conformal_map', pos=(0, 0), range=(5,5), **kwargs):
+        x_min, x_max = pos[0] - range[0], pos[0] + range[0]
+        y_min, y_max = pos[1] - range[1], pos[1] + range[1]
+        s: int = kwargs.get('step', 100)
         x = np.linspace(x_min, x_max, s)
         y = np.linspace(y_min, y_max, s)
-        X, Y = np.meshgrid(x,y)
-        W = np.array(self.calculate_values(X + Y * mpy.Complex(0,1)))
+        X, Y = np.meshgrid(x, y)
+        W = np.array(self.calculate_values(X + Y * mpy.Complex(0, 1)))
 
         if plot_type == 'conformal_map':
             self.conformal_map(X, Y, W, **kwargs)
@@ -85,25 +87,25 @@ class Complex_Function(calculus.Function):
 
     @staticmethod
     def conformal_map(X, Y, W, **kwargs):
-        lv = kwargs.get('levels', 50)
-        ls= kwargs.get('linestyles', 'solid')
-        a = kwargs.get('alpha', 0.65)
-        rcc = kwargs.get('rcc', 'b')
-        icc = kwargs.get('icc', 'r')
+        lv: int = kwargs.get('levels', 50)
+        ls: str = kwargs.get('linestyles', 'solid')
+        a: float = kwargs.get('alpha', 0.65)
+        rcc: str = kwargs.get('rcc', 'b')
+        icc: str = kwargs.get('icc', 'r')
         fig, ax = plt.subplots()
         ax.contour(X, Y, mpy.real(W), colors=rcc, linestyles=ls, levels=lv, alpha=a)
         ax.contour(X, Y, mpy.imag(W), colors=icc, linestyles=ls, levels=lv, alpha=a)
-        ax.set_xlabel("$x$",fontsize=15)
-        ax.set_ylabel("$y$",fontsize=15)
+        ax.set_xlabel("$x$", fontsize=15)
+        ax.set_ylabel("$y$", fontsize=15)
         ax.set_title("Conformal map: lines of constant $u: {\\rm Re}[w]$ and $v: {\\rm Im}[w]$")
         ax.grid()
         plt.show()
 
     @staticmethod
     def colour_map(X, Y, W, **kwargs):
-        cm = kwargs.get('cmap', 'viridis')
-        proj = kwargs.get('projection', 'rectilinear')
-        w_feature = kwargs.get('output_feature', 'module')
+        cm: str = kwargs.get('cmap', 'viridis')
+        proj: str = kwargs.get('projection', 'rectilinear')
+        w_feature: str = kwargs.get('output_feature', 'module')
 
         if w_feature in ('real', 'a'):
             f = mpy.real
@@ -124,7 +126,6 @@ class Complex_Function(calculus.Function):
             cf = ax.contourf(X, Y, f(W), 51, cmap= cm)
         
         elif proj == '3d':
-            w = f(W)
             cf = ax.plot_surface(X, Y, f(W), cmap=cm)
             ax.set_zlabel(f'${w_feature}$')
 
@@ -134,7 +135,4 @@ class Complex_Function(calculus.Function):
         plt.show()
 
     def __str__(self):
-        return 'Complex Function'
-
-    def __repr__(self):
-        return str(self)
+        return repr(self)

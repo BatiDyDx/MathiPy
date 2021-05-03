@@ -1,5 +1,6 @@
 from mathipy.datastr import Node
 
+
 class Tree(Node):
     def __init__(self, value, parent = None):
         self.value = value

@@ -1,5 +1,5 @@
-from mathipy import _math
 from mathipy.arithmetic import algebraic_expression
+
 
 class Power(algebraic_expression.AlgebraicExpression):
     def __init__(self, a, b):

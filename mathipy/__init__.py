@@ -15,7 +15,7 @@ from . import (
 
 from ._complex import (
     Complex, 
-    to_Complex, 
+    to_complex,
     real, 
     imag, 
     module, 
@@ -34,7 +34,10 @@ from ._math import (
     cosh,
     e,
     factorial,
+    fibonacci,
+    fibonacci_seq,
     gamma,
+    index_of_fib,
     Infinite,
     ln,
     log, 
@@ -54,15 +57,6 @@ from ._math import (
     summation,
     gcd,
     lcm,
-)
-#TODO   
-#Add algebra
-from .algebra import (
-    setUnion,
-    setIntersection,
-    setSub,
-    setContains,
-    setIsContained
 )
 
 from .arithmetic import (
@@ -85,7 +79,7 @@ from .datastr import (
 from .functions import (
     AbsoluteValue,
     BinomialDistribution,
-    Complex_Function,
+    ComplexFunction,
     Exponential,
     Linear,
     Log,
@@ -95,6 +89,7 @@ from .functions import (
     Rational,
 )
 
+from . import linalg
 from .linalg import (
     Vector, 
     Matrix,
@@ -117,6 +112,7 @@ from .linalg import (
     identity,
     linear_transformation
 )
+from. import numeric_operations
 
 from .numeric_operations import (
     max,
@@ -135,6 +131,7 @@ from .numeric_operations import (
     kwargsParser,
 )
 
+from . import polynomial
 from .polynomial import (
     Polynomial,
     polynomial_addition,
@@ -148,11 +145,11 @@ from .science import c, H, ket, time_dilation
 
 from .statistics import Statistics
 
-from .testing import test_time
-
-#TODO
-#Add all objects to be imported when importing *
+# TODO
+# Add all objects to be imported when importing *
 __all__ = [
-    '_complex', '_math', 'arithmetic', 'functions', 'calculus', 'datastr', 'linalg', 'numeric_operations',
-    'polynomial', 'statistics', 'Vector', 'Complex', 'Infinite', 'Variable'
-    ]
+    'algebra', '_complex', '_math', 'arithmetic', 'functions', 'calculus', 'datastr', 'linalg', 'numeric_operations',
+    'polynomial', 'science', 'statistics', 'Vector', 'Complex', 'Infinite', 'Variable', 'AbsoluteValue',
+    'BinomialDistribution', 'ComplexFunction', 'Exponential', 'Linear', 'Log', 'NormalDistribution',
+    'NRoot', 'Quadratic', 'quadratic_roots', 'Rational'
+]

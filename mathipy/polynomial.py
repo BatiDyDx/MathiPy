@@ -1,15 +1,18 @@
 import re
+from typing import Callable
 import numpy as np
 from mathipy import calculus
 from mathipy import numeric_operations as ops
 
+
 class Polynomial(calculus.Function):
     function_type = 'Polynomial'
+
     def __init__(self, *args, **kwargs):
         if args:
             values = list(enumerate(args[::-1]))[::-1]
         elif kwargs:
-            values = self.__process_coefficents(kwargs)
+            values = self.__process_coefficents(kwargs)[::-1]
         while values[0][1] == 0 and len(values) > 1:
             del values[0]
 
@@ -17,19 +20,19 @@ class Polynomial(calculus.Function):
         self.degree = len(values) - 1
 
     def __process_coefficents(self, kwargs):
-        f = lambda degree: int(re.findall('\d+$', degree)[0])
-        listed_coefficients = [[f(degree), coef] for degree, coef in kwargs.items()]
-        listed_coefficients.sort(key = lambda a: a[0], reverse=True)
+        f: Callable[[int], int] = lambda degree: int(re.findall('\d+$', degree)[0])
+        listed_coefficients: list[list[int, float]] = [[f(degree), coef] for degree, coef in kwargs.items()]
+        listed_coefficients.sort(key=lambda a: a[0])
         exponents = [n[0] for n in listed_coefficients]
-        limit = listed_coefficients[0][0]
+        limit = listed_coefficients[-1][0]
         for i in range(limit):
             if i not in exponents:
                 listed_coefficients.insert(i, [i, 0])
         return listed_coefficients
 
-    def __add__(q, p):
-        if ops.is_scalar(p):
-            p = Polynomial(p)
+    def __add__(p, q):
+        if ops.is_scalar(q):
+            q = Polynomial(q)
         return Polynomial(*polynomial_addition(p, q))
 
     def __radd__(p, q):
@@ -62,7 +65,7 @@ class Polynomial(calculus.Function):
         pass
 
     def __bool__(self):
-        return self.coefficients().any() == True
+        return self.coefficients().any() is True
 
     def __eq__(p, q):
         if isinstance(q, bool):

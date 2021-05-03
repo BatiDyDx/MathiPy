@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 from mathipy import _math
 from mathipy import numeric_operations as ops
 
+
 class Complex(object):
     __class__ = complex
+
     def __init__(self, *args, **kwargs):
         if args:
             if len(args) == 1 and isinstance(args[0], complex):
@@ -37,6 +39,9 @@ class Complex(object):
     @property
     def arg(self):
         return self.theta
+
+    def normalize(self):
+        return self / self.mod
 
     def __add__(z, w):
         if isinstance(w, (int, float)):
@@ -155,11 +160,10 @@ class Complex(object):
     def split(self):
         return self.a, self.b
 
-    def root(self, n: int, all_roots= False):
+    def root(self, n: int, all_roots: bool = False):
         r = self.r ** (1 / n)
         if all_roots:
-            #return Complex.unit_circle_roots(self.mod, )
-            roots = []
+            roots: list[Complex] = []
             theta_n = tuple((self.theta + _math.tau * k) / n for k in range(n))
             for theta in theta_n:
                 roots.append(Complex(r=r, arg=theta))
@@ -172,10 +176,9 @@ class Complex(object):
         return Complex(self.real, -self.imag)
 
     def inverse(self):
-        real_denominator, imag_denominator = self.split() 
-        denominator = (self.a) ** 2 + (self.b) ** 2
-        real_part = self.a / denominator
-        imag_part = - self.b / denominator
+        denominator = self.a ** 2 + self.b ** 2
+        real_part: float = self.a / denominator
+        imag_part: float = - self.b / denominator
         
         return Complex(real_part, imag_part)
 
@@ -210,15 +213,15 @@ class Complex(object):
         ax.hlines(0 ,x_min, x_max, color = 'white')
         ax.vlines(0, y_min, y_max, color = 'white')
 
-        element_a = plt.plot([0,a] ,[0,0], '-', linewidth = 3 , c='green')
-        element_b = plt.plot([a, a] ,[0,b], '-', linewidth = 3 , c='orange')
-        element_r = plt.plot([0,a] ,[0,b], '--', linewidth = 3, c='blue' )
+        element_a = plt.plot([0, a], [0,0], '-', linewidth=3, c='green')
+        element_b = plt.plot([a, a], [0,b], '-', linewidth=3, c='orange')
+        element_r = plt.plot([0, a], [0,b], '--', linewidth=3, c='blue')
         element_theta = plt.plot(x, y, color='red')
 
         textstr = '\n'.join(('$a: green$', '$bi: orange$', '$r: blue$', '$\\theta: red$'))
         props = dict(boxstyle='round', facecolor='lightblue', alpha=0.5)
-        ax.text(0.05,0.95, textstr, transform=ax.transAxes, fontsize=14,
-            verticalalignment='top', bbox=props)
+        ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14,
+                verticalalignment='top', bbox=props)
 
         plt.xlim(x_min, x_max)
         plt.ylim(y_min, y_max)
@@ -245,7 +248,10 @@ class Complex(object):
     
     def cartesian_expression(self):
         return f'({self.a} + {self.b}i)'
-    
+
+    def __hash__(self):
+        return hash(complex(self.real, self.imag))
+
     def __str__(self):
         #display(Latex(f'${self.r}  e^{{i {self.theta}}}$'))
         return self.cartesian_expression()
@@ -254,13 +260,16 @@ class Complex(object):
         sign = '+' if self.b >= 0 else '-'
         return f'{self.a}{sign}{abs(self.b)}i'
 
+
 @np.vectorize
 def real(z):
     return z.real
 
+
 @np.vectorize
 def imag(z):
     return z.imag
+
 
 @np.vectorize
 def module(z):
@@ -269,6 +278,7 @@ def module(z):
     except AttributeError:
         return Complex(z.real, z.imag).mod
 
+
 @np.vectorize
 def argument(z):
     try:
@@ -276,23 +286,26 @@ def argument(z):
     except AttributeError:
         return Complex(z.real, z.imag).arg
 
+
 @np.vectorize
-def to_Complex(z):
+def to_complex(z):
     return Complex(z.real, z.imag)
 
-def i(exp: int):
-    if exp % 4 == 0:
-        return Comlplex(1,0)
-    elif exp % 4 == 1:
-        return Complex(0,1)
-    elif exp % 4 == 2:
-        return Complex(-1,0)
-    elif exp % 4 == 3:
-        return Complex(0,-1)
 
-def circle_roots(n: int, r: float= 1) -> list:
-    roots = []
-    w = _math.tau / n
+def i(exp: int) -> Complex:
+    if exp % 4 == 0:
+        return Complex(1, 0)
+    elif exp % 4 == 1:
+        return Complex(0, 1)
+    elif exp % 4 == 2:
+        return Complex(-1, 0)
+    elif exp % 4 == 3:
+        return Complex(0, -1)
+
+
+def circle_roots(n: int, r: float = 1) -> list[Complex]:
+    roots: list[Complex] = []
+    w: float = _math.tau / n
     for k in range(n):
         theta = w * k
         roots.append(Complex(r=r, arg=theta))

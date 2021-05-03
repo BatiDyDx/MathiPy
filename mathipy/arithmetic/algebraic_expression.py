@@ -1,11 +1,13 @@
 from mathipy import _math
 from mathipy import arithmetic
+from dataclasses import dataclass
+
 
 class AlgebraicExpression:
-    '''
+    """
     Mathematical algebraic expressions
     for operating with multiple variables
-    '''
+    """
     consts = {
         'e'     : _math.e,
         'pi'    : _math.pi,
@@ -14,6 +16,7 @@ class AlgebraicExpression:
         'phi'   : _math.phi,
         'gamma' : _math.gamma
     }
+
     def __config__(self):
         if not isinstance(self.a, AlgebraicExpression):
             self.a = Constant(self.a)
@@ -57,9 +60,10 @@ class AlgebraicExpression:
     def __call__(self, v):
         return self.evaluate(v)
 
+
+@dataclass(init=True, eq=True)
 class Variable(AlgebraicExpression):
-    def __init__(self, name):
-        self.name = name
+    name: str
 
     def __repr__(self):
         return self.name
@@ -67,9 +71,10 @@ class Variable(AlgebraicExpression):
     def evaluate(self, vars):
         return vars[self.name]
 
+
+@dataclass(init=True, eq=True)
 class Constant(AlgebraicExpression):
-    def __init__(self, value):
-        self.value = value
+    value: float
 
     def __repr__(self):
         return str(self.value)

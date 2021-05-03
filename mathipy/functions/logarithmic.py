@@ -1,31 +1,32 @@
-import mathipy as mpy
 from mathipy import calculus, _math
+
 
 class Log(calculus.Function):
     function_type = 'Logarithmic'
     asymptote = True
-    def __init__(self, b = _math.e, **kwargs):
+
+    def __init__(self, b: float = _math.e, **kwargs):
         self.b = b
-        self.a = kwargs.get('a', 0)
-        self.c = kwargs.get('c', 0)
-        self.k = kwargs.get('k', 1)
-        self.n = kwargs.get('n', 1)
-        self.va = -self.a / self.k
+        self.a: float = kwargs.get('a', 0)
+        self.c: float = kwargs.get('c', 0)
+        self.k: float = kwargs.get('k', 1)
+        self.n: float = kwargs.get('n', 1)
+        self.va: float = -self.a / self.k
         if b <= 1:
             raise ValueError('Base must be greater than 1')
 
-    def get_yint(self):
+    def get_yint(self) -> float:
         return self(0)
 
-    def find_roots(self):
+    def find_roots(self) -> float:
         exp = -self.c / self.n
         root = ((self.b ** exp) - self.a) / self.k
         return root
 
-    def calculate_values(self, x):
-        return self.n * _math.log(self.k * x + self.a, base= self.b) + self.c
+    def calculate_values(self, x) -> float:
+        return self.n * _math.log(self.k * x + self.a, base=self.b) + self.c
 
-    def plot_func(self, ax):
+    def plot_func(self, ax) -> None:
         ax.scatter(0, self.get_yint(), color= calculus.Function.function_part['y-intercept'])
 
         if self.find_roots():
@@ -34,7 +35,7 @@ class Log(calculus.Function):
         y_min, y_max = ax.get_ylim()
         ax.vlines(self.va, y_min, y_max, color= calculus.Function.function_part['asymptote'], linewidth= 2.5, linestyle= '--')
 
-    def __call__(self, x):
+    def __call__(self, x) -> float:
         return self.calculate_values(x)
 
     def __str__(self):
@@ -61,6 +62,3 @@ class Log(calculus.Function):
             representation += f' + {self.c}'
         elif self.c < 0:
             representation += f' - {-self.c}'
-
-    def __repr__(self):
-        return 'Log Function'

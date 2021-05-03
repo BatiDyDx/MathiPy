@@ -2,7 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mathipy import _math, numeric_operations as ops
 
+
 class Function(object):
+    function_type = 'Undefined Type'
     function_part = {
         'roots'       : 'green',
         'y-intercept' :  'blue',
@@ -28,8 +30,8 @@ class Function(object):
         except ValueError:
             return np.nan
 
-    def plot(self, pos= 0, rnge= 5, **kwargs):
-        x_min, x_max = pos - rnge, pos + rnge
+    def plot(self, pos: int = 0, range: int = 5, **kwargs):
+        x_min, x_max = pos - range, pos + range
         x = np.linspace(x_min, x_max, 1000)
         y = self.calculate_values(x)
 
@@ -67,9 +69,14 @@ class Function(object):
     def plot_func(self, ax):
         ax.scatter(0, self.get_yint(), color= Function.function_part['y-intercept'])
 
+    def __repr__(self):
+        return f'{self.function_type} Function'
+
+
 @np.vectorize
 def to_radian(x: float) -> float:
     return x / 360 * _math.tau
+
 
 @np.vectorize
 def to_degree(x: float) -> float:
