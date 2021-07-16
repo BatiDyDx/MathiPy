@@ -1,14 +1,29 @@
-from mathipy import _math
+from numpy import linspace
+from mathipy.math import _math
 from mathipy import numeric_operations as ops
-from mathipy.linalg import Matrix
+from mathipy.math.linalg import Matrix
 import math
 
-###Constants########################
-c     = 299792458             # m / s | relativistic speed of light
-G     = 6.6743015e-11         # metres^3 / (kg * s) | Newtonian constant of gravitation
-k     = 8.987551792314e9      # N * m^2 / C^2 | Coulomb constant
-q_e   = 1.602176634e-19       # C | elementary charge
-alpha = 7.297352569311e-3     # finite structure
+## Constants #######################
+alpha = 7.297352568e-3          # adimensional | finite structure
+c     = 299_792_458             # m / s | relativistic speed of light
+G     = 6.6743015e-11           # metres^3 / (kg * s) | newtonian constant of gravitation
+k     = 8.987551792314e9        # N * m^2 / C^2 | Coulomb's constant
+q_e   = 1.602176634e-19         # C | elementary charge
+Z_0   = 376.730313668           # ohm | impedance of void
+epsilon_0   = 8.8541878128e-12        # F / m | vacuum electric permitivity
+mu_0   = 1.25663706212e-6        # N / A^2 | vacuum magnetic permeability
+h     = 6.6260693e-34           # m^2 * kg / s | planck constant
+h_bar = 1.054571628e-34         # m^2 * kg / s | reduced planck constant
+m_u   = 1.66053886e-27          # kg | atomic mass constant
+m_e   = 9.109383701528e-31      # kg | electron mass
+m_p   = 1.6726219236951e-27     # kg | proton mass
+m_n   = 1.6749274980495e-27     # kg | neutron mass
+E_h   = 4.35974417e-18          # J | energy of Hartree
+R     = 8.314472                # J * (K ^ -1) * mol ^ -1 | universal constant of ideal gases
+F     = 96_485.3383             # C / mol | Faraday's constant
+k_B   = 1.3806505e-23           # J / K | Boltzmann's constant
+a_0   = 0.5291772108e-10        # m | Bohr's radius
 ####################################
 
 
@@ -94,7 +109,7 @@ class Measure:
         return Measure(y, delta_y)
 
     def __neg__(self):
-        return Measure(-self.measure, self.delta)
+        return Measure(-self.measure, self.abs_error)
 
     def __sub__(self, m):
         return self + (-m)
@@ -139,7 +154,7 @@ class Measure:
         return self.sign_disc(m)
 
     def __set__(self):
-        return set(np.linspace(self.measure - self.abs_error, self.measure + self.abs_error))
+        return set(linspace(self.measure - self.abs_error, self.measure + self.abs_error))
 
     def __str__(self):
         return f"({self.measure} ± {self.abs_error})"
@@ -155,7 +170,7 @@ minkowski_metric = Matrix([
     [ 0,  0,  0, -1],
 ])
 
-def distance(x: tuple, g=minkowski_metric):
+def distance(x: tuple, g = minkowski_metric):
     dist = 0
     for i in range(g.m_dimension):
         for j in range(g.n_dimension):
@@ -173,7 +188,7 @@ def time_dilation(x: tuple):
     t, *D = x
     v = _math.sqrt(sum(map(lambda d: d ** 2, D))) / t
     try:
-        vt = _math.differential(t) / _math.differential(tau)
+        vt = t / tau
     except ZeroDivisionError:
         vt = float('inf')
 
@@ -185,3 +200,6 @@ def time_dilation(x: tuple):
 
     return vt
 
+# TODO
+def space_dilation():
+    pass

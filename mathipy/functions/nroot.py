@@ -1,8 +1,12 @@
-from mathipy import calculus, _math
-from numpy import nan
+import numpy as np
+from mathipy.math import _math, calculus
 
 
 class NRoot(calculus.Function):
+    """
+    f(x) = a * root_n(kx + p) + b
+    """
+    
     function_type = 'Nth Root'
 
     def __init__(self, n: int = 2, **kwargs):
@@ -20,7 +24,7 @@ class NRoot(calculus.Function):
 
     def find_roots(self):
         r = ((-self.b / self.a) ** self.n - self.p) / self.k
-        return r if self(r) == 0 else nan
+        return r if self(r) == 0 else np.nan
 
     def calculate_values(self, x):
         return self.a * _math.root_n((self.k * x + self.p), self.n, return_complex=False) + self.b

@@ -1,4 +1,4 @@
-from mathipy import calculus
+from mathipy.math import calculus
 
 
 class Linear(calculus.Function):

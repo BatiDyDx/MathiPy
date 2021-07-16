@@ -1,5 +1,5 @@
 import numpy as np
-from mathipy import calculus
+from mathipy.math import calculus
 from typing import TypeVar, Generic
 
 Polynomial = TypeVar('Polynomial')

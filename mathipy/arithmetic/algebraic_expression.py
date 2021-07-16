@@ -1,4 +1,4 @@
-from mathipy import _math
+from mathipy.math import _math
 from mathipy import arithmetic
 from dataclasses import dataclass
 

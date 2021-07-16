@@ -1,4 +1,4 @@
-from mathipy import calculus, polynomial, _complex, _math
+from mathipy.math import _math, calculus, polynomial
 
 
 class Quadratic(calculus.Function):
@@ -46,7 +46,7 @@ class Quadratic(calculus.Function):
         return y
 
     def plot_func(self, ax) -> None:
-        if not isinstance(self.x1, _complex.Complex):
+        if not isinstance(self.x1, complex):
             ax.scatter(self.roots, (0,0), c=calculus.Function.function_part['roots'])
         ax.scatter(*self.get_vertex(), c=calculus.Function.function_part['vertex'])
         ax.scatter(0, self.c, c=calculus.Function.function_part['y-intercept'])
@@ -113,8 +113,8 @@ def quadratic_roots(a, b, c):
         x1_real = x2_real = - b / (2 * a)
         x1_imag = _math.sqrt(_math.abs(root_body)) / (2 * a)
         x2_imag = - _math.sqrt(_math.abs(root_body)) / (2 * a)
-        x1 = _complex.Complex(x1_real, x1_imag)
-        x2 = _complex.Complex(x2_real, x2_imag)
+        x1 = complex(x1_real, x1_imag)
+        x2 = complex(x2_real, x2_imag)
 
     elif root_body > 0:
         x1 = (-b + _math.sqrt(root_body)) / (2 * a)

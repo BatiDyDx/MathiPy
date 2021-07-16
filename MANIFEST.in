@@ -1,0 +1,9 @@
+include *.txt
+recursive-include mathipy *.c
+recursive-include mathipy *.cpp
+recursive-include mathipy *.h
+recursive-include mathipy *.json
+recursive-include mathipy *.o
+recursive-include mathipy *.py
+recursive-include mathipy *.pyx
+recursive-include mathipy *.so

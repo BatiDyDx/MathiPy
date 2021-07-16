@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mathipy import _math, numeric_operations as ops
+from mathipy import numeric_operations as ops
+#from mathipy.math import _math
+import mathipy.math
 
-
-class Function(object):
+class Function:
     function_type = 'Undefined Type'
     function_part = {
         'roots'       : 'green',
@@ -15,11 +16,11 @@ class Function(object):
     }
 
     def __init__(self, f: callable, **kwargs):
-        self.function = f
+        self.f = ops.vectorize(f)
+        self.kwargs = kwargs
 
     def calculate_values(self, x):
-        vfunc = np.vectorize(self.function)
-        return vfunc(x)
+        return self.f(x, **self.kwargs)
 
     def __call__(self, x):
         return self.calculate_values(x)
@@ -27,7 +28,7 @@ class Function(object):
     def get_yint(self):
         try:
             return self(0)
-        except ValueError:
+        except (ValueError, ZeroDivisionError):
             return np.nan
 
     def plot(self, pos: int = 0, range: int = 5, **kwargs):
@@ -41,7 +42,7 @@ class Function(object):
         height = ops.kwargsParser(kwargs, ('height', 'h'), 1)
         v_scale = kwargs.get('vertical_scale', 'relative')
         if v_scale == 'relative':
-            y_min, y_max = ops.min(y) - height, ops.max(y) + height
+            y_min, y_max = mathipy.math.statistics.min(y) - height, mathipy.math.statistics.max(y) + height
         elif v_scale == 'absolute':
             y_min, y_max = - height / 2, height / 2
 
@@ -73,11 +74,23 @@ class Function(object):
         return f'{self.function_type} Function'
 
 
-@np.vectorize
+def differential(f: callable, x: float, magnitude: int = 13):
+    """
+    The differential of a function, dy/dx is:
+    dy / dx = lim of Δx -> 0 of Δy / Δx, where Δy = f(x + Δx) - f(x), 
+    Since computers can't represent infintely small numbers
+    the differential is computed relative to the magnitude parameter.
+    """
+    delta_x: float = 10 ** -magnitude
+    dy = f(x + delta_x) - f(x)
+    return dy / delta_x
+
+
+@ops.vectorize
 def to_radian(x: float) -> float:
-    return x / 360 * _math.tau
+    return x / 360 * mathipy.math._math.tau
 
 
-@np.vectorize
+@ops.vectorize
 def to_degree(x: float) -> float:
-    return x / _math.tau * 360
+    return x / mathipy.math._math.tau * 360

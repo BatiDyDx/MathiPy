@@ -1,4 +1,4 @@
-from mathipy import calculus, _math
+from mathipy.math import _math, calculus
 
 
 class AbsoluteValue(calculus.Function):

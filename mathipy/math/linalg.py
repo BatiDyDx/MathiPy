@@ -1,8 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import mathipy as mpy
+from mathipy.math.polynomial import Polynomial
+from mathipy.math import _math
 from mathipy import numeric_operations as ops
-from typing import TypeVar, Generic, Iterator, Union, Callable, NoReturn
+from typing import Iterator, Union, Callable
 
 
 class Tensor:
@@ -11,8 +11,8 @@ class Tensor:
     Vector or Matrix
 
     """
-    def map(self, f: Callable[[Union[int, float, complex]], Union[int, float, complex]], *args, **kwargs) -> NoReturn:
-        vfunc = np.vectorize(f)
+    def map(self, f: Callable[[Union[int, float, complex]], Union[int, float, complex]], *args, **kwargs) -> None:
+        vfunc = ops.vectorize(f)
         self.elements = vfunc(self.elements, *args, **kwargs)
 
 
@@ -26,7 +26,7 @@ class Vector(Tensor):
             raise TypeError(f'Vector input must be a one dimensional array, received {self.elements.shape}')
         
         self.dimension: int = self.elements.shape[1]
-        self.module: float = mpy.sqrt(sum(map(lambda v: v**2, self.elements)))
+        self.module: float = _math.sqrt(sum(map(lambda v: v**2, self.elements)))
         self.field: str = 'Complex' if np.issubdtype(self.elements.dtype, np.complex_) else 'Real'
     
     @property
@@ -87,47 +87,6 @@ class Vector(Tensor):
 
     def to_matrix(self):
         return Matrix(self.elements)
-
-    def plot(self):
-        if self.dimension != 2:
-            raise ValueError('Only 2-dimensional vectors can be graphed')
-
-        i, j = self.elements
-        #i_min, i_max = - abs(i) - 1, abs(i) + 1
-        fig, ax = plt.subplots()
-
-        ax.set_title("Vector plot")
-        plt.style.use('dark_background')
-
-        plt.ylabel('$j$')
-        plt.xlabel('$i$')
-        plt.grid()
-
-        head_w = self.module / 45
-        plt.arrow(0, 0, i, j, head_width = head_w, length_includes_head = True, color='r')
-
-        #ax.annotate("", xy=(i, j), xytext=(0, 0), arrowprops=dict(arrowstyle=))
-
-        g_dim = abs(i) if abs(i) >= abs(j) else abs(j)
-
-        if i > 0:
-            i_min, i_max = 0, g_dim
-        elif i < 0:
-            i_min, i_max = -g_dim, 0
-        else:
-            i_min, i_max = -j / 2, j / 2
-
-        if j > 0:
-            j_min, j_max = 0, g_dim
-        elif j < 0:
-            j_min, j_max = -g_dim, 0
-        else:
-            j_min, j_max = -i / 2, i / 2
-
-        plt.xlim(i_min, i_max)
-        plt.ylim(j_min, j_max)
-
-        plt.show()
 
     def __str__(self):
         return f'Vector({repr(self)})'
@@ -200,7 +159,7 @@ class Matrix(Tensor):
 
     def characteristic_poly(self):
         coefs = list(np.poly(self.elements))
-        return mpy.Polynomial(*coefs)
+        return Polynomial(*coefs)
 
     def __add__(A, B):
         if isinstance(B, Tensor):
@@ -314,6 +273,9 @@ def inner_product(v: Vector, u: Vector):
 def cross_product(v: Vector, u: Vector):
     return Vector(np.cross(v.elements, u.elements))
 
+
+def mixed_product(v: Vector, u: Vector, w: Vector):
+    return dot_product(cross_product(v, u), w)
 
 def tensor_product(v: Vector, u: Vector):
     w = []

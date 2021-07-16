@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mathipy as mpy
-from mathipy import calculus
+from mathipy.math import calculus, complex_math
+from mathipy import numeric_operations as ops
 from typing import Callable
 
 
@@ -9,11 +9,10 @@ class ComplexFunction(calculus.Function):
     function_type = 'Complex'
 
     def __init__(self, f: Callable[[complex], complex]):
-        self.f = f
+        self.f = ops.vectorize(f)
 
     def calculate_values(self, z: complex) -> complex:
-        vfunc = np.vectorize(self.f)
-        return vfunc(z)
+        return self.f(z)
 
     def __call__(self, z) -> complex:
         return self.calculate_values(z)
@@ -25,7 +24,7 @@ class ComplexFunction(calculus.Function):
         x = np.linspace(x_min, x_max, s)
         y = np.linspace(y_min, y_max, s)
         X, Y = np.meshgrid(x, y)
-        W = np.array(self.calculate_values(X + Y * mpy.Complex(0, 1)))
+        W = np.array(self.calculate_values(X + Y * 1j))
 
         if plot_type == 'conformal_map':
             self.conformal_map(X, Y, W, **kwargs)
@@ -93,8 +92,8 @@ class ComplexFunction(calculus.Function):
         rcc: str = kwargs.get('rcc', 'b')
         icc: str = kwargs.get('icc', 'r')
         fig, ax = plt.subplots()
-        ax.contour(X, Y, mpy.real(W), colors=rcc, linestyles=ls, levels=lv, alpha=a)
-        ax.contour(X, Y, mpy.imag(W), colors=icc, linestyles=ls, levels=lv, alpha=a)
+        ax.contour(X, Y, complex_math.real(W), colors=rcc, linestyles=ls, levels=lv, alpha=a)
+        ax.contour(X, Y, complex_math.imag(W), colors=icc, linestyles=ls, levels=lv, alpha=a)
         ax.set_xlabel("$x$", fontsize=15)
         ax.set_ylabel("$y$", fontsize=15)
         ax.set_title("Conformal map: lines of constant $u: {\\rm Re}[w]$ and $v: {\\rm Im}[w]$")
@@ -108,13 +107,13 @@ class ComplexFunction(calculus.Function):
         w_feature: str = kwargs.get('output_feature', 'module')
 
         if w_feature in ('real', 'a'):
-            f = mpy.real
+            f = complex_math.real
         elif w_feature in ('imag', 'b'):
-            f = mpy.imag
+            f = complex_math.imag
         elif w_feature in ('module', 'mod', 'r'):
-            f = mpy.module
+            f = complex_math.module
         elif w_feature in ('argument', 'arg', 'theta'):
-            f = mpy.argument
+            f = complex_math.argument
 
         fig = plt.figure()
         ax = fig.add_subplot(projection=proj)

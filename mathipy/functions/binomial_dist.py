@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-from mathipy import calculus, numeric_operations as ops
-
+from mathipy import numeric_operations as ops
+from mathipy.math import calculus
 
 class BinomialDistribution(calculus.Function):
     function_type = 'Binomial Distribution'

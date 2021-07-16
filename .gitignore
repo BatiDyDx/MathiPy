@@ -11,10 +11,5 @@ __pycache__
 test.*
 #Mac files
 .DS_Store
-#Latex files
-latex.aux
-latex.fdb_latexmk
-latex.fls
-latex.log
-latex.synctex.gz
-latex.tex
+#mypy directory
+.mypy_cache
