@@ -17,9 +17,13 @@ class ComplexFunction(calculus.Function):
     def __call__(self, z) -> complex:
         return self.calculate_values(z)
 
-    def plot(self, plot_type='conformal_map', pos=(0, 0), range=(5,5), **kwargs):
+    def plot(self, plot_type='conformal_map', pos = None, range = None, **kwargs):
+        range = range if range is not None else (5,5)
+        pos = pos if pos is not None else (0, 0)
+
         x_min, x_max = pos[0] - range[0], pos[0] + range[0]
         y_min, y_max = pos[1] - range[1], pos[1] + range[1]
+        
         s: int = kwargs.get('step', 100)
         x = np.linspace(x_min, x_max, s)
         y = np.linspace(y_min, y_max, s)

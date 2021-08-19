@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt
+import math
 from typing import Any, Callable, Dict, List, Sequence, Union, TypeVar, Generic, Optional
-from mathipy.math import _math
-import mathipy.functions
+from mathipy.math import ntheory
+import matplotlib.pyplot as plt
 
 DataValue = TypeVar('DataValue')
 
@@ -65,22 +65,25 @@ class Statistics(Generic[DataValue]):
         """
         return frequency(self.iterable, x, f_type)
 
-    def create_ND(self) -> mathipy.functions.NormalDistribution:
+    def create_ND(self): #-> 'mathipy.functions.normal_dist.NormalDistribution':
         """
         Creates a NormalDistribution object, where mu and sigma are
         obtained from the std and mean of self.iterable
         """
+        import mathipy.functions.normal_dist
+
         mean: float = self.mean()
         std: float = self.std()
-        return mathipy.functions.NormalDistribution(mu=mean, sigma=std)
+        return mathipy.functions.normal_dist.NormalDistribution(mu=mean, sigma=std)
     
-    def plot(self, pos: Optional[int] = None, r: int = 5, **kwargs: Any) -> None:
+    def plot(self, pos: Optional[int] = None, **kwargs: Any) -> None:
         """
         Plots the NormalDistribution Function obtained
         from self.iterable
         """
         pos = pos if pos is not None else int(self.mean())
-        norm_dist: mathipy.functions.NormalDistribution = self.create_ND()
+        r = kwargs.get('range', 5)
+        norm_dist = self.create_ND()
         norm_dist.plot(pos, r, **kwargs)
 
     def plot_hist(self, **kwargs: Any) -> None:
@@ -126,6 +129,7 @@ def max(args: Sequence[Number]) -> Number:
             max_n = i
     return max_n
 
+
 def mean(args: Sequence[Number]) -> float:
     """
     Return the mean of a series of iterable objects
@@ -161,8 +165,7 @@ def frequency(args: Sequence[Number], x: Number, f_type: str = 'absolute') -> Un
 def std(args: Sequence[Number]) -> Number:
     n: int = len(args)
     m: float = mean(args)
-    x_1: float = 1 / n
+    x_1: float = 1. / n
     f: Callable[[int], float] = (lambda x: (args[x] - m) ** 2)
-    x_2: float = _math.summation(f, up_bound = n - 1, low_bound = 0)
-    return _math.sqrt(x_1 * x_2)
-
+    x_2: float = ntheory.summation(f, up_bound = n - 1, low_bound = 0)
+    return math.sqrt(x_1 * x_2)

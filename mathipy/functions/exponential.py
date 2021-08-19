@@ -1,10 +1,14 @@
-from mathipy.math import _math, calculus
+import math
+from mathipy.math import ntheory, calculus
 
 
 class Exponential(calculus.Function):
+    """
+    f(x) = k · a ^ (nx - b) + c
+    """
     function_type = 'Exponential'
     
-    def __init__(self, a: float = _math.e, **kwargs):
+    def __init__(self, a: float = ntheory.e, **kwargs):
         self.k: float = kwargs.get('k', 1)
         self.a = a
         self.n: float = kwargs.get('n', 1)
@@ -17,15 +21,14 @@ class Exponential(calculus.Function):
         return self(0)
 
     def find_roots(self) -> float:
-        return (_math.log(-self.c / self.k, base=self.a) + self.b) / self.n
+        return (math.log(-self.c / self.k, self.a) + self.b) / self.n
 
     def calculate_values(self, x) -> float:
         y = self.k * (self.a ** (self.n * x - self.b)) + self.c
         return y
 
     def plot_func(self, ax) -> None:
-        y_int = self.get_yint()
-        ax.scatter(0, y_int, color=calculus.Function.function_part['y-intercept'])
+        ax.scatter(0, self.get_yint(), color=calculus.Function.function_part['y-intercept'])
         ax.scatter(self.find_roots(), 0, color=calculus.Function.function_part['roots'])
         h_asymptote = self.c
         x_min, x_max = ax.get_xlim()
@@ -35,14 +38,11 @@ class Exponential(calculus.Function):
                   linestyle='--'
         )
 
-    def __call__(self, x) -> float:
-        return self.calculate_values(x)
-
     def __str__(self):
         representation = ''
         if self.k != 1:
             representation += str(self.k) + ' · '
-        if self.a == _math.e:
+        if self.a == ntheory.e:
             representation += 'e^(x'
         else:
             representation += f'{self.a}^('

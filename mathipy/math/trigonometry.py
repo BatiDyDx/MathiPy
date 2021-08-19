@@ -1,6 +1,7 @@
+import math
 from mathipy.cfuncs.bin import trigonometry as ctrig
 from mathipy import numeric_operations as ops
-from mathipy.math import _math
+from mathipy.math import ntheory
 
 ############################################
 # Trignometric functions, and their inverses
@@ -13,7 +14,7 @@ def sin(x):
     an angle in a triangle. The input must be in radians
     """
     def complex_sin(z):
-        return (_math.e ** (1j * z) - _math.e ** (-1j * z)) / 2j
+        return (ntheory.e ** (1j * z) - ntheory.e ** (-1j * z)) / 2j
 
     if x.imag != 0:
         return complex_sin(x)
@@ -28,7 +29,7 @@ def cos(x):
     an angle in a triangle. The input must be in radians
     """
     def complex_cos(z):
-        return (_math.e ** (1j * z) + _math.e ** (-1j * z)) / 2
+        return (ntheory.e ** (1j * z) + ntheory.e ** (-1j * z)) / 2
 
     if x.imag != 0:
         return complex_cos(x)
@@ -44,8 +45,8 @@ def tan(x):
     an angle in a triangle. The input must be in radians
     """
     def complex_tan(z):
-        y = (_math.e ** (1j * z) - _math.e ** (-1j * z)) * -1j
-        y /= (_math.e ** (1j * z) + _math.e ** (-1j * z))
+        y = (ntheory.e ** (1j * z) - ntheory.e ** (-1j * z)) * -1j
+        y /= (ntheory.e ** (1j * z) + ntheory.e ** (-1j * z))
         return y
 
     if x.imag != 0:
@@ -60,7 +61,7 @@ def arcsin(x):
     """
     def complex_arcsin(z):
         y = z * 1j + (1 - z ** 2) ** .5
-        y = _math.ln(y) / 1j
+        y = math.log(y) / 1j
         return y
     
     if x.imag != 0:
@@ -75,14 +76,14 @@ def arccos(x):
     """
     def complex_arccos(z):
         y = z + (z ** 2 - 1) ** .5
-        y = _math.ln(y) / 1j
+        y = math.log(y) / 1j
         return y
 
     if x.imag != 0:
         return complex_arccos(x)
     else:
         if x == 0:
-            return _math.pi_2
+            return ntheory.math_constants['pi/2']
         return ctrig.arccos(x)
 
 def arctan(x):
@@ -91,7 +92,7 @@ def arctan(x):
     """
     def complex_arctan(z):
         y = (1 + z * 1j) / (1 - z * 1j)
-        y = -0.5j * _math.ln(y)
+        y = -0.5j * math.log(y)
         return y
 
     if x.imag != 0:

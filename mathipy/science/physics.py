@@ -1,36 +1,48 @@
+import math
+from typing import Dict, Tuple, Union
 from numpy import linspace
-from mathipy.math import _math
 from mathipy import numeric_operations as ops
 from mathipy.math.linalg import Matrix
-import math
 
-## Constants #######################
-alpha = 7.297352568e-3          # adimensional | finite structure
-c     = 299_792_458             # m / s | relativistic speed of light
-G     = 6.6743015e-11           # metres^3 / (kg * s) | newtonian constant of gravitation
-k     = 8.987551792314e9        # N * m^2 / C^2 | Coulomb's constant
-q_e   = 1.602176634e-19         # C | elementary charge
-Z_0   = 376.730313668           # ohm | impedance of void
-epsilon_0   = 8.8541878128e-12        # F / m | vacuum electric permitivity
-mu_0   = 1.25663706212e-6        # N / A^2 | vacuum magnetic permeability
-h     = 6.6260693e-34           # m^2 * kg / s | planck constant
-h_bar = 1.054571628e-34         # m^2 * kg / s | reduced planck constant
-m_u   = 1.66053886e-27          # kg | atomic mass constant
-m_e   = 9.109383701528e-31      # kg | electron mass
-m_p   = 1.6726219236951e-27     # kg | proton mass
-m_n   = 1.6749274980495e-27     # kg | neutron mass
-E_h   = 4.35974417e-18          # J | energy of Hartree
-R     = 8.314472                # J * (K ^ -1) * mol ^ -1 | universal constant of ideal gases
-F     = 96_485.3383             # C / mol | Faraday's constant
-k_B   = 1.3806505e-23           # J / K | Boltzmann's constant
-a_0   = 0.5291772108e-10        # m | Bohr's radius
-####################################
+## Physical constants #######################
+
+physical_constants: Dict[str, float] = {
+    'alpha'       : 7.297352568e-3,          # adimensional | finite structure
+    'c'           : 299_792_458,             # m / s | relativistic speed of light
+    'g'           : 9.80665,                 # m / s^2 | standard gravitational acceleration for the surface of the Earth
+    'G'           : 6.6743015e-11,           # metres^3 / (kg * s) | newtonian constant of gravitation
+    'k'           : 8.987551792314e9,        # N * m^2 / C^2 | Coulomb's constant
+    'q_e'         : 1.602176634e-19,         # C | elementary charge
+    'Z_0'         : 376.730313668,           # ohm | impedance of void
+    'epsilon_0'   : 8.8541878128e-12,        # F / m | vacuum electric permitivity
+    'mu_0'        : 1.25663706212e-6,        # N / A^2 | vacuum magnetic permeability
+    'h'           : 6.6260693e-34,           # m^2 * kg / s | planck constant
+    'h_bar'       : 1.054571628e-34,         # m^2 * kg / s | reduced planck constant
+    'm_u'         : 1.66053886e-27,          # kg | atomic mass constant
+    'm_e'         : 9.109383701528e-31,      # kg | electron mass
+    'm_p'         : 1.6726219236951e-27,     # kg | proton mass
+    'm_n'         : 1.6749274980495e-27,     # kg | neutron mass
+    'E_h'         : 4.35974417e-18,          # J | energy of Hartree
+    'R'           : 8.314472,                # J * (K ^ -1) * mol ^ -1 | universal constant of ideal gases
+    'F'           : 96_485.3383,             # C / mol | Faraday's constant
+    'k_B'         : 1.3806505e-23,           # J / K | Boltzmann's constant
+    'a_0'         : 0.5291772108e-10,        # m | Bohr's radius
+}
+
+c: float = physical_constants['c']
+##########################################
 
 
 class Measure:
+    """
     
-    def __init__(self, x, delta):
-        
+    """
+    measure: float
+    abs_error: float
+    relative_error: float
+    percentual_error: str
+
+    def __init__(self, x: float, delta: float) -> None:    
         if ops.is_iterable(x):
             self.measure = ops.mean(x)
             mx, mn = ops.max(x) + delta, ops.min(x) - delta
@@ -64,15 +76,15 @@ class Measure:
         assert self.abs_error > 0, f'Absolute error must be greater than zero, but received delta: {delta}'
 
 
-    def percentual_expression(self):
+    def percentual_expression(self) -> str:
         return f"({self.measure} ± {self.percentual_error})"
 
-    def _round_sig_figs(self):
+    def _round_sig_figs(self) -> None:
         fsfp = -int(ops.floor(math.log10(abs(self.abs_error)))) # first significant figure place
         self.abs_error = round(self.abs_error, fsfp)
         self.measure = round(self.measure, fsfp)
 
-    def sign_disc(self, m):
+    def sign_disc(self, m: 'Measure') -> bool:
         if not isinstance(m, Measure):
             raise TypeError('sign_disc recieved {m.__class__.__name} instead of Measure type')
 
@@ -80,7 +92,7 @@ class Measure:
         return delta > self.abs_error + m.abs_error
 
     @staticmethod
-    def make_constant(k: float, *args, epsilon_factor: int = 1) -> float:
+    def make_constant(k: float, *args: 'Measure', epsilon_factor: int = 1) -> float:
         # Minimum relative error of the measures passed as arguments
         mn_relative_error = min(args, key=(lambda m: m.relative_error)).relative_error
         
@@ -99,7 +111,7 @@ class Measure:
         # Truncate k to the order of magnitude of its absolute error
         return ops.trunc(k, -k_order)
 
-    def __add__(self, m):
+    def __add__(self, m: 'Measure') -> 'Measure':
         if not isinstance(m, Measure):
             raise TypeError(f'Cannot perform addition on Measure and {m.__class__.__name__}')
         
@@ -108,13 +120,13 @@ class Measure:
         
         return Measure(y, delta_y)
 
-    def __neg__(self):
+    def __neg__(self) -> 'Measure':
         return Measure(-self.measure, self.abs_error)
 
-    def __sub__(self, m):
+    def __sub__(self, m: 'Measure') -> 'Measure':
         return self + (-m)
 
-    def __mul__(self, m):
+    def __mul__(self, m: Union[int, float, 'Measure']) -> 'Measure':
         if isinstance(m, Measure):
             y = self.measure * m.measure
             delta_y = (self.relative_error + m.relative_error) * y
@@ -126,10 +138,10 @@ class Measure:
         else:
             raise TypeError(f'Product is not supported between Measure type and {m.__class__.__name__}')
 
-    def __rmul__(self, m):
+    def __rmul__(self, m: Union[int, float, 'Measure']) -> 'Measure':
         return self.__mul__(m)
 
-    def __truediv__(self, m):
+    def __truediv__(self, m: Union[int, float, 'Measure']) -> 'Measure':
         if isinstance(m, Measure):
             return self * Measure(1 / m.measure, m.abs_error)
         
@@ -139,7 +151,7 @@ class Measure:
         else:
             raise TypeError(f'Division is not supported between Measure type and {m.__class__.__name__}')
 
-    def __pow__(self, n):
+    def __pow__(self, n: int) -> 'Measure':
         if not ops.is_scalar(n) or isinstance(n, complex):
             raise TypeError(f'Power is not supported between Measure type and {n.__class__.__name__}')
         else:
@@ -147,19 +159,19 @@ class Measure:
             delta_y = self.relative_error * n * y
             return Measure(y, delta_y)
 
-    def __eq__(self, m):
+    def __eq__(self, m: 'Measure') -> bool:
         return not self.sign_disc(m)
 
-    def __ne__(self, m):
+    def __ne__(self, m: 'Measure') -> bool:
         return self.sign_disc(m)
 
-    def __set__(self):
+    def __set__(self) -> set:
         return set(linspace(self.measure - self.abs_error, self.measure + self.abs_error))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"({self.measure} ± {self.abs_error})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Measure object'
 
 
@@ -170,14 +182,14 @@ minkowski_metric = Matrix([
     [ 0,  0,  0, -1],
 ])
 
-def distance(x: tuple, g = minkowski_metric):
+def distance(x: Tuple[float, float, float, float], g: Matrix = minkowski_metric) -> float:
     dist = 0
     for i in range(g.m_dimension):
         for j in range(g.n_dimension):
             dist += g[i, j] * x[i] * x[j]
-    return _math.sqrt(dist)
+    return math.sqrt(dist)
 
-def time_dilation(x: tuple):
+def time_dilation(x: Tuple[float, float, float, float]) -> float:
     """
     time must be measured in lightseconds. To achieve this
     multiply time by c:
@@ -186,14 +198,14 @@ def time_dilation(x: tuple):
     """
     tau = distance(x)
     t, *D = x
-    v = _math.sqrt(sum(map(lambda d: d ** 2, D))) / t
+    v = math.sqrt(sum(map(lambda d: d ** 2, D))) / t
     try:
         vt = t / tau
     except ZeroDivisionError:
         vt = float('inf')
 
     vx = v * vt
-    velocity = _math.sqrt(c ** 2 * vt ** 2 - vx ** 2)
+    velocity = math.sqrt(c ** 2 * vt ** 2 - vx ** 2)
 
     print('vx is: ', vx)
     print('velocity is: ', velocity)

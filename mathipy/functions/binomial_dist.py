@@ -16,16 +16,13 @@ class BinomialDistribution(calculus.Function):
         y: float = c * self.p ** x * (1 - self.p) ** (self.n - x)
         return y
 
-    def __call__(self, x) -> float:
-        return self.calculate_values(x)
-
     def plot(self, **kwargs) -> None:
         fig, ax = plt.subplots()
-        c: str = kwargs.get('c', None)
+        colour: str = kwargs.get('c', None)
         plt.xlabel('$x$')
         plt.ylabel('$P(x)$')
         for i in range(self.n):
-            ax.scatter(i, self(i), c=c)
+            ax.scatter(i, self(i), c=colour)
         plt.grid()
         plt.show()
 

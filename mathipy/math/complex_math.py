@@ -1,9 +1,9 @@
-import numpy as np
-from mathipy.math import _math, trigonometry as trig
+from mathipy.config import Real, Scalar
+from mathipy.math import ntheory, trigonometry as trig
 from mathipy import numeric_operations as ops
-from typing import Union
+from typing import List, Tuple, Union
 
-def phase(x: Union[int, float, complex]) -> float:
+def phase(x: Scalar) -> float:
     """
     Given a number, it returns its phase, or argument 
     Mathematically, the phase is the angle between the line from
@@ -17,37 +17,38 @@ def phase(x: Union[int, float, complex]) -> float:
     """
     if x.real == 0:
         if x.imag > 0:
-            return _math.pi / 2
+            return ntheory.pi / 2
         elif x.imag < 0:
-            return - _math.pi / 2
+            return - ntheory.pi / 2
         else:
             return None
     elif x.real < 0:
         if x.imag >= 0:
-            return trig.arctan(x.imag / x.real) + _math.pi
+            return trig.arctan(x.imag / x.real) + ntheory.pi
         else:
-            return trig.arctan(x.imag / x.real) - _math.pi
+            return trig.arctan(x.imag / x.real) - ntheory.pi
     else:
         return trig.arctan(x.imag / x.real)
 
 
-def to_cartesian(module: Union[int, float], arg: float) -> complex:
+def to_cartesian(module: Real, arg: float) -> complex:
     return module * cis(arg)
 
 
-def cis(theta):
+def cis(theta: float) -> Union[float, complex]:
     """
     cis(theta) is equal to cos(theta) + i sin(theta)
     It is used for converting a complex number in the polar
-    form to the trigonometric, or cartesian form
+    form to the trigonometric or cartesian form
     >>> cis(0)
     1
     >>> cis(pi / 2)
     1j
     """
-    return _math.cos(theta) + _math.sin(theta) * 1j
+    return trig.cos(theta) + trig.sin(theta) * 1j
 
-def to_polar(x: Union[int, float, complex]) -> tuple[float, float]:
+
+def to_polar(x: Scalar) -> Tuple[float, float]:
     return (abs(x), phase(x))
 
 
@@ -57,12 +58,14 @@ def conjugate(x: complex) -> complex:
         """
         return x.real - x.imag * 1j
 
-def ordered_pair(x: complex) -> tuple[float, float]:
+
+def ordered_pair(x: complex) -> Tuple[float, float]:
         """
         Returns the tuple (a, b), like the ordered pair
         in the complex plane
         """
         return (x.real, x.imag)
+
 
 def normalize(x: complex) -> complex:
         """
@@ -72,9 +75,11 @@ def normalize(x: complex) -> complex:
         To get the normalized version of a number, it has to be divided
         by its module.
         """
-        return x / _math.abs(x)
+        if x == 0:
+            return 0
+        return x / abs(x)
 
-def complex_roots(x: complex, n: int) -> list[complex]:
+def complex_roots(x: complex, n: int) -> List[complex]:
     """
     Given the number of roots n, the distance to the origin r,
     and the initial angle, theta, it calculates all k such that
@@ -82,7 +87,7 @@ def complex_roots(x: complex, n: int) -> list[complex]:
     """
     r, theta = to_polar(x)
     roots: list = []
-    w: float = _math.tau / n
+    w: float = ntheory.tau / n
     for k in range(n):
         arg = w * k + theta
         z = to_cartesian(r, arg)
@@ -91,7 +96,7 @@ def complex_roots(x: complex, n: int) -> list[complex]:
 
 
 @ops.vectorize
-def real(z):
+def real(z: Scalar) -> Real:
     """
     Returns the real part of a number
     """
@@ -99,7 +104,7 @@ def real(z):
 
 
 @ops.vectorize
-def imag(z):
+def imag(z: Scalar) -> Real:
     """
     Returns the imaginary part of a number
     """
@@ -107,15 +112,15 @@ def imag(z):
 
 
 @ops.vectorize
-def module(z):
+def module(z: Scalar) -> Real:
     """
     Returns the module of a number
     """
-    return _math.abs(z)
+    return abs(z)
 
 
 @ops.vectorize
-def argument(z):
+def argument(z: Scalar) -> Real:
     """
     Returns the argument of a number
     """

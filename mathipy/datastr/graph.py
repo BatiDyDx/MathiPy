@@ -1,5 +1,25 @@
-class Graph(object):
-    pass
+from typing import TypeVar, Generic
+from abc import ABC, abstractmethod, abstractproperty
+
+T = TypeVar('T')
+
+class Graph(ABC):
+    """Graph abstract base class"""
+
+    @abstractmethod
+    def add(self, *iterable) -> None:
+        """Add elements to the graph"""
+        pass
+
+    @abstractproperty
+    def connections(self):
+        """Get connections of the data node"""
+        pass
+
+    @abstractmethod
+    def __str__(self) -> str:
+        """String representation of the graph"""
+        pass
 
 
 class Node(Graph):
@@ -27,15 +47,12 @@ class Node(Graph):
             new_node.connections.append(self)
             new_nodes.append(new_node)
 
-        return new_nodes if True else None
+        return new_nodes
 
     def get_connection(self, value):
         for connection in self.connections:
             if connection.node_value == value:
                 return connection
-
-    def get_connections(self):
-        return self.connections
 
     def is_connected_with(self, node):
         for connection in self.connections:

@@ -1,6 +1,6 @@
 from typing import Iterable, Tuple, Union
 import numpy as np
-from mathipy.math import _math
+import math
 from mathipy.numeric_operations import is_iterable
 from mathipy.math.quaternion import (
     Quaternion,
@@ -96,7 +96,7 @@ class Octonion:
         return p * q.inverse()
 
     def __abs__(self) -> Real:
-        return _math.sqrt(sum(map(lambda x: x ** 2, self.ordered_pair())))
+        return math.sqrt(sum(map(lambda x: x ** 2, self.ordered_pair())))
 
     def conjugate(self) -> 'Octonion':
         result = octonion_conjugate(self.as_array())

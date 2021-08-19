@@ -1,8 +1,9 @@
+import math
 from functools import wraps
 from mathipy.config import Scalar
 from typing import Any, Callable, Dict, Iterable, Sequence, TypeVar, Union, Tuple, Optional
 import numpy as np
-import mathipy.math
+import mathipy.math.statistics
 
 Args = TypeVar('Args')
 KwArgs = TypeVar('KwArgs')
@@ -234,9 +235,6 @@ def get_error(
     error_type_str: str = 'Mean squared error is: ' if squared_error else 'Mean error is: '
     print(error_type_str, mathipy.math.statistics.mean(errors))
 
-from mathipy.math import _math
-# Temporary
-import math
 
 def round_significant_figures(n: float, sigf: int) -> float:
     """
@@ -250,7 +248,24 @@ def round_significant_figures(n: float, sigf: int) -> float:
     if sigf < 0:
         raise ValueError(f'significant figures must be positive, received {sigf}')
     
-    return round(n, sigf - int(_math.floor(math.log10(abs(n)))) - 1)
+    return round(n, sigf - int(math.floor(math.log10(abs(n)))) - 1)
+
+
+@vectorize
+def trunc(n: float, decimals: int = 0) -> float:
+    """
+    Truncates a number, to the decimals indicated.
+    :param n: number to be truncated
+    :param decimals: decimals to which n is truncated
+    :return: truncated n
+    """
+    if not is_integer(decimals):
+        raise TypeError('decimal places must be an integer')
+    elif decimals < 0:
+        raise ValueError('decimal places has to greater or equal to 0')
+
+    factor = 10.0 ** decimals
+    return math.floor(n * factor) / factor
 
 
 def handleZeroDivision(f: Callable[[X], Y]) -> Callable[[X], Y]:
@@ -258,10 +273,12 @@ def handleZeroDivision(f: Callable[[X], Y]) -> Callable[[X], Y]:
     Decorates a function, so if f raises a ZeroDivisionError,
     handleZeroDivision raises an exception and returns mpy.Infinite()
     """
+    from mathipy.math import ntheory
+
     @wraps(f)
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
         except ZeroDivisionError:
-            return _math.Infinite()
+            return ntheory.Infinite()
     return wrapper

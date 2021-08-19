@@ -10,10 +10,15 @@ from . import (
 
 from .math import (
     complex_math,
-    _math,
+    ntheory,
+    calculus,
+    geometry,
+    trigonometry,
     linalg,
     polynomial,
-    statistics
+    statistics,
+    quaternion,
+    octonion,
 )
 
 from .arithmetic import (
@@ -50,7 +55,10 @@ from .numeric_operations import (
     round_if_close,
     is_scalar,
     is_iterable,
+    is_integer,
     kwargsParser,
+    trunc,
+    vectorize
 )
 
 

@@ -1,5 +1,5 @@
 import numpy as np
-from mathipy.math import _math, calculus
+from mathipy.math import calculus
 
 
 class NRoot(calculus.Function):
@@ -27,10 +27,7 @@ class NRoot(calculus.Function):
         return r if self(r) == 0 else np.nan
 
     def calculate_values(self, x):
-        return self.a * _math.root_n((self.k * x + self.p), self.n, return_complex=False) + self.b
-
-    def __call__(self, x):
-        return self.calculate_values(x)
+        return self.a * ((self.k * x + self.p) ** (1. / self.n)) + self.b
 
     def plot_func(self, ax):
         ax.scatter(0, self.get_yint(), color=calculus.Function.function_part['y-intercept'])

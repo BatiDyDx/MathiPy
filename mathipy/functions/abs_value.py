@@ -1,4 +1,4 @@
-from mathipy.math import _math, calculus
+from mathipy.math import calculus
 
 
 class AbsoluteValue(calculus.Function):
@@ -26,7 +26,7 @@ class AbsoluteValue(calculus.Function):
         return x1, x2
 
     def calculate_values(self, x) -> float:
-        y = self.a * _math.abs(x - self.h) + self.b
+        y = self.a * abs(x - self.h) + self.b
         return y
 
     def plot_func(self, ax):
@@ -34,9 +34,6 @@ class AbsoluteValue(calculus.Function):
         if self.roots != (None, None):
             ax.scatter((self.x1, self.x2), (0, 0), color=calculus.Function.function_part['roots'])
         ax.scatter(self.h, self.b, color=calculus.Function.function_part['vertex'])
-
-    def __call__(self, x) -> float:
-        return self.calculate_values(x)
 
     def __str__(self):
         representation = ''

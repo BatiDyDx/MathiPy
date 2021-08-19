@@ -19,6 +19,7 @@
     
     "constants": [
         "pi"   ,
+        "pi/2" ,
         "e"    ,
         "phi"  ,
         "gamma",

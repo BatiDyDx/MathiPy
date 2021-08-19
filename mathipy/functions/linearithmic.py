@@ -1,5 +1,6 @@
+import math
 import numpy as np
-from mathipy.math import calculus, _math
+from mathipy.math import calculus
 
 class Linearithmic(calculus.Function):
     """
@@ -26,10 +27,7 @@ class Linearithmic(calculus.Function):
         ax.scatter(0, self.get_yint(), color=calculus.Function.function_part['y-intercept'])
 
     def calculate_values(self, x):
-        return (self.m * x + self.h) * _math.log(self.k * x + self.a, base = self.b)
-
-    def __call__(self, x):
-        return self.calculate_values(x)
+        return (self.m * x + self.h) * math.log(self.k * x + self.a, self.b)
 
     def __str__(self):
         representation = ''

@@ -1,12 +1,13 @@
+from typing import Callable, Dict, TypeVar
 import numpy as np
 import matplotlib.pyplot as plt
 from mathipy import numeric_operations as ops
-#from mathipy.math import _math
 import mathipy.math
+from mathipy.config import Real
 
 class Function:
-    function_type = 'Undefined Type'
-    function_part = {
+    function_type: str = 'Undefined Type'
+    function_part: Dict[str, str] = {
         'roots'       : 'green',
         'y-intercept' :  'blue',
         'vertex'      :   'red',
@@ -22,7 +23,7 @@ class Function:
     def calculate_values(self, x):
         return self.f(x, **self.kwargs)
 
-    def __call__(self, x):
+    def __call__(self, x) -> Real:
         return self.calculate_values(x)
 
     def get_yint(self):
@@ -73,6 +74,28 @@ class Function:
     def __repr__(self):
         return f'{self.function_type} Function'
 
+X = TypeVar('X')
+Y = TypeVar('Y')
+
+# TODO / DELETE
+def lim(f: Callable[[X], Y], a: X, epsilon: float = 10e-10, approach: int = 0) -> Y:
+    """
+    :param epsilon: precision 
+    :param approach: 1, 0, or -1. If 0, the limit by both sides are calculated.
+    If different, returns np.nan. If approach is 1, the right limit towards a is
+    calculated. If approach is -1, the left limit towards a is calculated.
+    """
+    if approach == 1:
+        pass
+
+    elif approach == -1:
+        pass
+
+
+    left_lim = lim(f, a, epsilon, approach = -1)
+    right_lim = lim(f, a, epsilon, approach =  1)
+    return np.allclose(left_lim, right_lim, epsilon)
+
 
 def differential(f: callable, x: float, magnitude: int = 13):
     """
@@ -88,9 +111,73 @@ def differential(f: callable, x: float, magnitude: int = 13):
 
 @ops.vectorize
 def to_radian(x: float) -> float:
-    return x / 360 * mathipy.math._math.tau
+    return x / 360 * mathipy.math.ntheory.tau
 
 
 @ops.vectorize
 def to_degree(x: float) -> float:
-    return x / mathipy.math._math.tau * 360
+    return x / mathipy.math.ntheory.tau * 360
+
+
+@ops.vectorize
+def sign(x: Real) -> int:
+    if x == 0:
+        return 0
+    return 1 if x > 0 else -1
+
+
+@ops.vectorize
+def floor(x: Real) -> Real:
+    """
+    Floor function. Rounds to the nearest lower integer
+    >>> floor(1.5)
+    1.0
+    >>> floor(-3.0)
+    -3.0
+    """
+    return x - mantissa(x)
+
+
+@ops.vectorize
+def ceil(x: Real) -> Real:
+    """
+    Ceil function. Rounds to the nearest greater integer
+    >>> ceil(10.3)
+    11.0
+    >>> floor(0)
+    0
+    """
+    return -floor(-x)
+
+
+@ops.vectorize
+def mantissa(x: Real) -> float:
+    """
+    Mantissa function. Returns the floating value
+    of a number
+    >>> mantissa(1.432523)
+    0.432523
+    >>> mantissa(0.3)
+    0.3
+    >>> mantissa(-2.5)
+    0.5
+    """
+    return x % 1
+
+
+@ops.vectorize
+def maximum(a: Real, b: Real) -> Real:
+    """
+    Returns the maximum between two elements.
+    Behaves like a universal function.
+    """
+    return (a >= b) * a + b * (a < b)
+
+
+@ops.vectorize
+def minimum(a: Real, b: Real) -> Real:
+    """
+    Returns the minimum between two elements.
+    Behaves like a universal function.
+    """
+    return (a <= b) * a + b * (a > b)

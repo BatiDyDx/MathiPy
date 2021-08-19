@@ -1,6 +1,6 @@
 import numpy as np
 from mathipy.math.linalg import Vector, Matrix
-from mathipy.math import trigonometry as trig, _math
+from mathipy.math import trigonometry as trig, ntheory
 
 
 def ket(a: int, n: int= -1) -> Vector:
@@ -9,7 +9,7 @@ def ket(a: int, n: int= -1) -> Vector:
             el = np.array([[1, 1]])
         elif a == '-':
             el = np.array([[1, -1]])
-        return Vector(el / _math.sqrt2)
+        return Vector(el / ntheory.math_constants['sqrt2'])
 
     if n == -1:
         i = 0
@@ -19,9 +19,9 @@ def ket(a: int, n: int= -1) -> Vector:
     el = [[0 if a != i else 1 for i in range(2**n)]]
     return Vector(el)
 
-EPR = (ket(0, 2) + ket(3, 2)) / _math.sqrt2
+EPR = (ket(0, 2) + ket(3, 2)) / ntheory.math_constants['sqrt2']
 
-H = Matrix((1 / _math.sqrt2) * np.array(
+H = Matrix((1 / ntheory.math_constants['sqrt2']) * np.array(
     [
         [1,  1],
         [1, -1]
@@ -62,13 +62,13 @@ def Ry(theta):
     return Matrix(el)
 
 def Rz(theta):
-    x = _math.e ** (1j * theta)
+    x = ntheory.e ** (1j * theta)
     el = np.array([
         [1, 0],
         [0, x]
     ])
     return Matrix(el)
 
-S = Rz(_math.pi_2)
-Sdg = Rz(-_math.pi_2)
-T = Rz(_math.pi / 4)
+S = Rz(ntheory.math_constants['pi/2'])
+Sdg = Rz(-ntheory.math_constants['pi/2'])
+T = Rz(ntheory.pi / 4)

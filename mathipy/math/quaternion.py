@@ -1,6 +1,6 @@
 import numpy as np
+import math
 from mathipy.math.linalg import Matrix
-from mathipy.math import _math
 from typing import Iterable, Tuple, Union
 from mathipy.config import Real, Scalar
 from mathipy.numeric_operations import is_iterable
@@ -110,7 +110,7 @@ class Quaternion:
         )
 
     def __abs__(self) -> Real:
-        return _math.sqrt(sum(map(lambda x: x ** 2), self.ordered_pair()))
+        return math.sqrt(sum(map(lambda x: x ** 2), self.ordered_pair()))
 
     def as_array(self) -> np.ndarray:
         return np.array(self.ordered_pair())

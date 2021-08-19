@@ -1,35 +1,25 @@
 
-from ._math import (
-    abs,
-    e,
-    factorial,
-    fibonacci,
-    fibonacci_seq,
-    gamma,
-    index_of_fib,
-    Infinite,
-    ln,
-    log, 
-    phi,
+from .ntheory import (
     pi,
-    pi_2,
-    root_n,
-    sqrt,
-    sqrt2, 
+    e,
     tau,
+    Infinite,
     productory,
     summation,
+    math_constants,
     gcd,
     lcm,
-    maximum,
-    mantissa,
-    minimum,
-    floor,
-    ceil,
-    trunc,
-    combinatorial,
+    is_multiple,
+    is_divisor,
+    coprimes,
+    factorial,
+    subfactorial,
     variation,
-    permutation
+    combinatorial,
+    permutation,
+    fibonacci,
+    fibonacci_seq,
+    index_of_fib,
 )
 
 from .trigonometry import (
@@ -59,7 +49,15 @@ from .trigonometry import (
     tanh,
 )
 
-from .calculus import Function, to_degree, to_radian, differential
+from .calculus import (
+    Function, 
+    to_degree, 
+    to_radian, 
+    differential,
+    maximum,
+    minimum,
+    mantissa
+)
 
 from .complex_math import (
     to_cartesian,

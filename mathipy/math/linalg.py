@@ -1,19 +1,73 @@
+import math
+from typing import Iterator, Tuple, Union, Callable
+from abc import ABC, abstractmethod
 import numpy as np
 from mathipy.math.polynomial import Polynomial
-from mathipy.math import _math
+from mathipy.math import trigonometry
 from mathipy import numeric_operations as ops
-from typing import Iterator, Union, Callable
+from mathipy.config import Real, Scalar
 
-
-class Tensor:
+class Tensor(ABC):
     """
-    Tensor class:
-    Vector or Matrix
-
+    Tensor abstract base class.
+    Matrix and Vector classes inherit from Tensor
     """
-    def map(self, f: Callable[[Union[int, float, complex]], Union[int, float, complex]], *args, **kwargs) -> None:
+    rank: int
+
+    def change_dtype(self, dtype: type):
+        self.elements = self.elements.astype(dtype)
+
+    def map(self, f: Callable[[Scalar], Scalar], *args, **kwargs) -> None:
         vfunc = ops.vectorize(f)
         self.elements = vfunc(self.elements, *args, **kwargs)
+
+    @abstractmethod
+    def __add__(self) -> 'Tensor':
+        pass
+
+    @abstractmethod
+    def __sub__(self) -> 'Tensor':
+        pass
+
+    @abstractmethod
+    def __neg__(self) -> 'Tensor':
+        pass
+
+    @abstractmethod
+    def __mul__(self) -> 'Tensor':
+        pass
+
+    @abstractmethod
+    def __rmul__(self) -> 'Tensor':
+        pass
+
+    @abstractmethod
+    def __truediv__(self) -> 'Tensor':
+        pass
+
+    @abstractmethod
+    def __matmul__(self) -> 'Tensor':
+        pass
+
+    @abstractmethod
+    def __getitem__(self): #TODO add return type to __getitem__ abstract method
+        pass
+
+    @abstractmethod
+    def __iter__(self) -> Iterator:
+        pass
+
+    @abstractmethod
+    def __len__(self) -> int:
+        pass
+
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
+    
+    @abstractmethod
+    def __repr__(self) -> str:
+        pass
 
 
 class Vector(Tensor):
@@ -26,7 +80,7 @@ class Vector(Tensor):
             raise TypeError(f'Vector input must be a one dimensional array, received {self.elements.shape}')
         
         self.dimension: int = self.elements.shape[1]
-        self.module: float = _math.sqrt(sum(map(lambda v: v**2, self.elements)))
+        self.module: float = math.sqrt(sum(map(lambda v: v**2, self.elements[0])))
         self.field: str = 'Complex' if np.issubdtype(self.elements.dtype, np.complex_) else 'Real'
     
     @property
@@ -79,7 +133,7 @@ class Vector(Tensor):
     def __iter__(self) -> Iterator:
         return iter(self.elements.flatten())
 
-    def __getitem__(self, index: int) -> Union[int, float, complex]:
+    def __getitem__(self, index: int) -> Scalar:
         return self.elements[0, index]
 
     def normalize(self):
@@ -106,9 +160,6 @@ class Matrix(Tensor):
         if len(self.shape) != Matrix.rank:
             raise TypeError(f'Matrix shape must be of length 2, received {self.shape}')
 
-    def change_dtype(self, dtype: type):
-        self.elements = self.elements.astype(dtype)
-
     @property
     def adj(self):
         return adjoint(self)
@@ -118,7 +169,7 @@ class Matrix(Tensor):
         return cofactor(self)
 
     @property
-    def det(self) -> float:
+    def det(self) -> Scalar:
         return determinant(self)
 
     @property
@@ -129,7 +180,7 @@ class Matrix(Tensor):
     def T(self):
         return transpose(self)
 
-    def trace(self) -> float:
+    def trace(self) -> Scalar:
         if not self.is_square:
             raise ValueError('Matrix must be square to calculate trace')
         else:
@@ -162,20 +213,12 @@ class Matrix(Tensor):
         return Polynomial(*coefs)
 
     def __add__(A, B):
-        if isinstance(B, Tensor):
-            if isinstance(B, Vector):
-                B = B.to_matrix()
-            return matrix_addition(A, B)
-        else: raise TypeError(f'Addition is only supported between Tensor instances, received {type(B)}')
-
-    def __radd__(A, B):
-        return A.__add__(B)
+        if not isinstance(B, Matrix):
+            raise TypeError(f'Addition is only supported between Matrix instances, received {B.__class__.__name__}')
+        return matrix_addition(A, B)
 
     def __sub__(A, B):
         return A + (-B)
-
-    def __rsub__(A, B):
-        return (-A).__add__(B)
 
     def __neg__(A):
         return A * -1
@@ -197,7 +240,7 @@ class Matrix(Tensor):
                 B = B.to_matrix()
             return matrix_product(A, B)
         else:
-            raise TypeError(f'Matrix product is only supported between tensor instances, received {type(B)}')
+            raise TypeError(f'Matrix product is only supported between tensor instances, received {B.__class__.__name__}')
 
     def __rmatmul__(A, B):
         if isinstance(B, Vector):
@@ -250,14 +293,14 @@ class Matrix(Tensor):
         return str(self.elements)
 
 
-def vector_addition(v: Vector, u: Vector):
+def vector_addition(v: Vector, u: Vector) -> Vector:
     if v.dimension == u.dimension:
         return Vector(v.elements + u.elements)
     else:
         raise ValueError(f'Vector dimensions must be equal to perform addition, received {v.dimension} and {u.dimension}')
 
 
-def dot_product(v: Vector, u: Vector):
+def dot_product(v: Vector, u: Vector) -> Vector:
     if v.field == 'Complex' and u.field == 'Complex':
         return inner_product(v, u)
 
@@ -265,19 +308,73 @@ def dot_product(v: Vector, u: Vector):
         return np.dot(v.elements, u.elements)
 
 
-def inner_product(v: Vector, u: Vector):
+def inner_product(v: Vector, u: Vector) -> Vector:
     u_hat = Vector(u.elements.conjugate())
-    return dot_product(v, u_hat)
+    return np.dot(v.elements, u_hat.elements)
 
 
-def cross_product(v: Vector, u: Vector):
+def cross_product(v: Vector, u: Vector) -> Vector:
     return Vector(np.cross(v.elements, u.elements))
 
 
-def mixed_product(v: Vector, u: Vector, w: Vector):
+def mixed_product(v: Vector, u: Vector, w: Vector) -> Scalar:
+    """
+    Returns the mixed product of 3 vectors: v ∧ u x w
+    
+    """
     return dot_product(cross_product(v, u), w)
 
-def tensor_product(v: Vector, u: Vector):
+
+def check_if_parallel(v: Vector, u: Vector) -> bool:
+    """
+    Evaluates if two vectors are parallel.
+    The module of the cross product between two 
+    vectors is equivalent to the are of the parallelogram
+    formed by them.
+    Then, if v || u, the area of the parallelogram is 0,
+    which implies |v ∧ u| = 0
+    """
+    return cross_product(v, u).module == 0
+
+
+def check_if_orthogonal(v: Vector, u: Vector) -> bool:
+    """
+    Evaluates if two vectors are orthogonal (perpendicular)
+    Two vectors are perpendicular if and only if (v x u) = 0 
+    """
+    return dot_product(v, u) == 0
+
+
+def proy_vector(v: Vector, u: Vector) -> Vector:
+    """
+    Returns the v vector proyection over u
+    proy_u(v) = |v| cos(v ^ u) u_0 = (v x u_0)u_0
+    """
+    u_0 = u.normalize()
+    alpha = dot_product(v, u_0)
+    return alpha * u_0
+
+
+def check_if_coplanar(v: Vector, u: Vector, w: Vector) -> bool:
+    """
+    Evaluates if three vectors are coplanars.
+    The absolute value mixed product between v,
+    """
+    return mixed_product(v, u, w) == 0
+
+
+def angle_of_vectors(v: Vector, u: Vector) -> Real:
+    """
+    Returns the angle between two vectors (v ^ u)
+    v x u = |v|·|u|·cos(v ^ u) 
+    ==> (v x u) / (|v|·|u|) = cos(v ^ u)
+    ==> arccos( (v x u) / (|v|·|u|) ) = (v ^ u)
+    """
+    x = dot_product(v, u) / (v.module * u.module)
+    return trigonometry.arccos(x)
+
+
+def tensor_product(v: Vector, u: Vector) -> Vector:
     w = []
     for i in v:
         for j in u:
@@ -314,7 +411,7 @@ def transpose(A: Matrix) -> Matrix:
     return Matrix(A.elements.T)
 
 
-def determinant(A: Matrix) -> float:
+def determinant(A: Matrix) -> Scalar:
     if A.is_square:
         return np.linalg.det(A.elements)
     else:
@@ -343,17 +440,17 @@ def linear_transformation(A: Matrix, *args: Vector) -> None:
     pass
 
 
-def k_matrix(k: Union[int, float, complex], shape: tuple[int, int]) -> Matrix:
+def k_matrix(k: Scalar, shape: Tuple[int, int]) -> Matrix:
     m, n = shape
     elements: list[list] = [[k] * n for _ in range(m)]
     return Matrix(elements)
 
 
-def zeros_matrix(shape: tuple[int, int]) -> Matrix:
+def zeros_matrix(shape: Tuple[int, int]) -> Matrix:
     return k_matrix(0, shape)
 
 
-def ones_matrix(shape: tuple[int, int]) -> Matrix:
+def ones_matrix(shape: Tuple[int, int]) -> Matrix:
     return k_matrix(1, shape)
 
 

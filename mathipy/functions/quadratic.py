@@ -1,12 +1,16 @@
-from mathipy.math import _math, calculus, polynomial
+import math
+from mathipy.math import calculus
 
 
 class Quadratic(calculus.Function):
+    """
+    f(x) = ax^2 + bx + c
+    """
     function_type = 'Quadratic'
 
     def __init__(self, a: float = 1, **kwargs):
         self.a = a
-        self.degree: int = 2
+
         if 'b' in kwargs and 'c' in kwargs:
             b, c = kwargs['b'], kwargs['c']
             self.b: float = b
@@ -14,6 +18,7 @@ class Quadratic(calculus.Function):
             self.x1, self.x2 = self.roots = quadratic_roots(a=self.a, b=self.b, c=self.c)
             self.xv: float = - self.b / (2 * self.a)
             self.yv: float = self.a * (self.xv ** 2) + self.b * self.xv + self.c
+        
         elif 'xv' in kwargs and 'yv' in kwargs:
             xv, yv = kwargs['xv'], kwargs['yv']
             self.xv: float = xv
@@ -21,6 +26,7 @@ class Quadratic(calculus.Function):
             self.b: float = (-2 * self.xv) * self.a
             self.c: float = ((self.xv ** 2) * self.a) + self.yv
             self.x1, self.x2 = self.roots = quadratic_roots(a=self.a, b=self.b, c=self.c)
+        
         elif 'x1' in kwargs and 'x2' in kwargs:
             x1, x2 = kwargs['x1'], kwargs['x2']
             self.x1, self.x2 = x1, x2
@@ -29,8 +35,9 @@ class Quadratic(calculus.Function):
             self.xv: float = - self.b / (2 * self.a)
             self.yv: float = self.a * (self.xv ** 2) + self.b * self.xv + self.c
             self.roots: list[float, float] = [self.x1, self.x2]
+        
         else:
-            raise ValueError('Expression type not admitted') 
+            raise NotImplementedError('Expression type not admitted')
 
         if self.a == 0:
             raise ValueError('a term cannot be equal to 0')
@@ -93,12 +100,9 @@ class Quadratic(calculus.Function):
 
         return factored_exp
 
-    def __str__(self):
-        return polynomial.Polynomial(
-            a2= self.a, 
-            a1= self.b, 
-            a0= self.c
-        ).__str__()
+    def __str__(self) -> str:
+        representation: str = f'{self.a}^x + {self.b}x + {self.c}'
+        return representation
 
 
 def quadratic_roots(a, b, c):
@@ -111,13 +115,13 @@ def quadratic_roots(a, b, c):
 
     elif root_body < 0:
         x1_real = x2_real = - b / (2 * a)
-        x1_imag = _math.sqrt(_math.abs(root_body)) / (2 * a)
-        x2_imag = - _math.sqrt(_math.abs(root_body)) / (2 * a)
+        x1_imag = math.sqrt(math.abs(root_body)) / (2 * a)
+        x2_imag = - math.sqrt(math.abs(root_body)) / (2 * a)
         x1 = complex(x1_real, x1_imag)
         x2 = complex(x2_real, x2_imag)
 
     elif root_body > 0:
-        x1 = (-b + _math.sqrt(root_body)) / (2 * a)
-        x2 = (-b - _math.sqrt(root_body)) / (2 * a)
+        x1 = (-b + math.sqrt(root_body)) / (2 * a)
+        x2 = (-b - math.sqrt(root_body)) / (2 * a)
 
     return x1, x2

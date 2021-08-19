@@ -7,7 +7,7 @@ Polynomial = TypeVar('Polynomial')
 class Rational(calculus.Function):
     function_type = 'Rational'
 
-    def __init__(self, p: Generic[Polynomial], q: Generic[Polynomial]):
+    def __init__(self, p: Polynomial, q: Polynomial):
         self.p = p
         self.q = q
 
@@ -45,7 +45,7 @@ class Rational(calculus.Function):
     def __str__(self):
         return f'({self.p}) / ({self.q})'
 
-class Homographic(Rational):
+class Homographic(calculus.Function):
     function_type = 'Homographic'
 
     def __init__(self, p1, p0, q1, q0):

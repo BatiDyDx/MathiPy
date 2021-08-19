@@ -1,7 +1,6 @@
-from mathipy.arithmetic import algebraic_expression
+from mathipy import arithmetic
 
-
-class Sum(algebraic_expression.AlgebraicExpression):
+class Sum(arithmetic.algebraic_expression.AlgebraicExpression):
     def __init__(self, a, b):
         self.a = a
         self.b = b
@@ -14,7 +13,7 @@ class Sum(algebraic_expression.AlgebraicExpression):
         return self.a.evaluate(vars) + self.b.evaluate(vars)
 
 
-class Minus(algebraic_expression.AlgebraicExpression):
+class Minus(arithmetic.algebraic_expression.AlgebraicExpression):
     def __init__(self, a, b):
         self.a = a
         self.b = b

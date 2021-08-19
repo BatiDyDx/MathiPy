@@ -22,12 +22,8 @@ class Linear(calculus.Function):
         return y
     
     def plot_func(self, ax) -> None:
-        ax.scatter(0, self.b, c=calculus.Function.function_part['y-intercept'])
-        ax.scatter(self.find_roots(), 0, c=calculus.Function.function_part['roots'])
-
-    def __call__(self, x) -> float:
-        y = self.calculate_values(x)
-        return y
+        ax.scatter(0, self.b, c = calculus.Function.function_part['y-intercept'])
+        ax.scatter(self.find_roots(), 0, c = calculus.Function.function_part['roots'])
 
     def __str__(self):
         representation = f'{self.a}x'

@@ -1,21 +1,42 @@
 import re
-from typing import Callable, Union, TypeVar
+from enum import Enum, auto
+from typing import AnyStr, Callable, Dict, Generic, Iterator, List, Tuple, Union, TypeVar
 import numpy as np
 from mathipy import numeric_operations as ops
-from mathipy.math import _math, calculus
+from mathipy.math import calculus
 
-# TODO define a generic type for coefficients of polynomials
-# Coefficient = TypeVar['Coefficient', int, float, complex, Complex]
+class CoefficientInputError(Exception):
+    def __init__(self, msg: AnyStr) -> None:
+        self.message = msg
+        super().__init__(msg)
 
-class Polynomial(calculus.Function):
+class Domain(Enum):    
+    """Enumerated class for domain constants"""
+
+    def _generate_next_value_(name, start, count, last_values):
+        return name[0] + name[1:].lower()
+    
+    NATURAL = auto()
+    INTEGER = auto()
+    REAL = auto()
+    COMPLEX = auto()
+
+# TODO
+# Add a type variable for polynomial coefficients, and make Polynomial
+# a generic class
+
+Coefficient = TypeVar('Coefficient', int, float, complex)
+
+class Polynomial(calculus.Function, Generic[Coefficient]):
     function_type: str = 'Polynomial'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Coefficient, **kwargs: Coefficient):
         if args and kwargs:
-            raise ValueError(
+            raise CoefficientInputError(
                 """
-                Arguments and keyboard arguments cannot be passed simultaneously,
-                since its ambiguous for coefficients assignment. Only one of them must be used
+                Arguments and keyboard arguments cannot be passed simultaneously as 
+                coefficients for a Polynomial instance since its ambiguous at assignment time. 
+                Only one of them must be passed.
                 """
             )
         if args:
@@ -40,13 +61,13 @@ class Polynomial(calculus.Function):
         self.values = values
         self.degree = len(values) - 1
 
-    def __pair_degree_coefficients(pair_string_coef):
-        """
-        pair_string_coef is an argument of type list[list[str, Union[int, float, complex]]]
-        __pair_degree_coefficients return is of type list[list[int, Union[int, float, complex]]],
-        that returns a modified version of pair_string_coef, changing the string for an int
 
-        f([['a10', 5], ['a3', 6], ['a0', -1]]) == [[10, 5], [3, 6], [0, -1]]
+    @staticmethod
+    def __pair_degree_coefficients(pair_string_coef: Dict[str, Coefficient]) -> List[Tuple[int, Coefficient]]:
+        """
+        Returns a list of 2-tuples,  where the first element corresponds to the
+        degree and the second one to the coefficient, changing the string for an int
+        __pair_degree_coefficients({'a10': 5, 'a3': 6, 'a0': -1}) == [(10, 5), (3, 6), (0, -1)]
         """
         # f is a function that given a string with a format like 'aN',
         # where a is any letter and N is an integer, returns n as an int.
@@ -54,24 +75,25 @@ class Polynomial(calculus.Function):
         f: Callable[[str], int] = lambda s: int(re.findall('\d+$', s)[0])
         
         # pdc stands for pair degree-coefficient
-        # pdc is a list of lists, where the ith element is a list
+        # pdc is a list of tuples, with every tuple 
         # containing two elements, the first one being the degree,
         # and the second one the corresponding coefficient 
-        pdc: list[list[int, Union[int, float, complex]]] = map(lambda pair: [f(pair[0]), pair[1]], pair_string_coef)
+        pdc: Iterator[Tuple[int, Coefficient]] = map(lambda key: (f(key), pair_string_coef[key]), pair_string_coef)
+        pdc: List[Tuple[int, Coefficient]] = list(pdc)
         
         # Sort pdc by the first components of their elements.
         # Practically, it sorts the list by the degrees of the polynomial
         pdc.sort(key=lambda a: a[0])
         return pdc
 
-    def __complete_coefficents(self, kwargs: dict[str, Union[int, float, complex]]):
-        pair_dc: list[list[int, Union[int, float, complex]]] = Polynomial.__pair_degree_coefficients(kwargs.items())
+    def __complete_coefficents(self, kw_coefs: Dict[str, Coefficient]) -> List[Tuple[int, Coefficient]]:
+        pair_dc: List[Tuple[int, Coefficient]] = Polynomial.__pair_degree_coefficients(kw_coefs)
         
         # Get a list of all degrees
-        degrees: list[int] = [a[0] for a in pair_dc] 
+        degrees: List[int] = [a[0] for a in pair_dc] 
         
-        # Limit is the biggest of degrees, since pair_dc is sorted
-        limit: int = pair_dc[-1][0]
+        # Limit is the biggest of degrees and the last in the degrees list, since pair_dc is sorted
+        limit: int = degrees[-1]
         
         # Iterate through all integers until the limit
         for i in range(limit):
@@ -81,33 +103,45 @@ class Polynomial(calculus.Function):
                 pair_dc.insert(i, [i, 0])
         return pair_dc
 
-    
-    def __add__(p, q):
+    def __add__(p, q: 'Polynomial') -> 'Polynomial':
         """
         Method for adding self to a Polynomial instance q.
         """
-        if ops.is_scalar(q):
-            q = Polynomial(q)
-        return Polynomial(*polynomial_addition(p, q))
+        return polynomial_addition(p, q)
 
-    def __radd__(p, q):
+    def __radd__(p, q: 'Polynomial') -> 'Polynomial':
         return q.__add__(p)
 
-    def __sub__(p, q):
+    def __iadd__(p, q: 'Polynomial') -> None:
+        """
+        Modifies the first polynomial to be equal to the sum of p and q,
+        without having to create a new instance of the class.
+        """
+        poly_sum: Polynomial = polynomial_addition(p, q)
+        p.values = poly_sum.values
+        p.degree = poly_sum.degree
+
+    def __sub__(p, q: 'Polynomial') -> 'Polynomial':
         """
         Method for substracting q from self.
         Equivalent to self + (- q)
         """
         return p + (-q)
 
-    def __neg__(p):
+    def __rsub__(p, q: 'Polynomial') -> 'Polynomial':
+        pass
+
+    def __isub__(p, q: 'Polynomial') -> None:
+        p.__iadd__(-q)
+
+    def __neg__(p) -> 'Polynomial':
         """
         Returns the opposite of self, equivalent to multiplying
         by the scalar -1
         """
         return p * -1
 
-    def __mul__(p, q):
+    def __mul__(p, q: Union[int, float, complex, 'Polynomial']) -> 'Polynomial':
         """
         Multiplies self by q.
         If q is a polynomial, it returns the polynomial product
@@ -121,10 +155,15 @@ class Polynomial(calculus.Function):
         else:
             return q.__mul__(p)
 
-    def __rmul__(p, q):
+    def __rmul__(p, q: Union[int, float, complex, 'Polynomial']) -> 'Polynomial':
         return p.__mul__(q)
 
-    def __truediv__(p, q):
+    def __imul__(p, q: Union[int, float, complex, 'Polynomial']) -> 'Polynomial':
+        new_poly: Polynomial = polynomial_product(p, q)
+        p.values = new_poly.values
+        p.degree = new_poly.degree
+
+    def __truediv__(p, q: Union[int, float, complex, 'Polynomial']) -> Tuple['Polynomial', 'Polynomial']:
         """
         Returns an array with 2 elements, where the first one
         is the quotient polynomial and the second is the remainder
@@ -133,24 +172,24 @@ class Polynomial(calculus.Function):
         raise NotImplementedError
         return polynomial_division(p, q)
 
-    def __mod__(p, q):
+    def __mod__(p, q: 'Polynomial') -> 'Polynomial':
         """
         Returns the remainder of the division between p and q.
         """
         raise NotImplementedError
         return polynomial_division(p, q)[1]
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.coefficients().any() is True
 
-    def __eq__(p, q):
+    def __eq__(p, q: Union[bool, 'Polynomial']):
         if isinstance(q, bool):
-            return bool(p) == q
+            return bool(p) is q
         else:
             mx_d = max_degree(p, q)
             return np.array_equal(p.coefficients(mx_d), q.coefficients(mx_d))
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Coefficient:
         """
         Returns the ith coefficient of the polynomial.
         If i is greater than the coefficients degree, returns 0
@@ -163,21 +202,21 @@ class Polynomial(calculus.Function):
         finally:
             return item
 
-    def __setitem__(self, index, value):
+    def __setitem__(self, index: int, value: Coefficient) -> None:
         """
         Sets the ith coefficient of the polynomial to the value assigned
         """
         i = -(1 + index)
         self.values[i][1] = value
 
-    def __delitem__(self, index):
+    def __delitem__(self, index: int) -> None:
         """
         Sets the ith coefficient of the polynomial to 0
         """
         i = -(1 + index)
         self.values[i][1] = 0
 
-    def coefficients(self, length=-1):
+    def coefficients(self, length: int = -1) -> np.ndarray:
         """
         Returns an np.array of the coefficients
         If length is passed, and greater than the degree of the polynomial,
@@ -191,19 +230,19 @@ class Polynomial(calculus.Function):
                 coefs.insert(0, 0)
         return np.array(coefs)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """
         Returns an iterable of the coefficients
         """
         return iter(self.coefficients())
 
-    def __call__(self, x):
+    def __call__(self, x: Union[int, float, complex]) -> Union[int, float, complex]:
         """
         Evaluates the polynomial in the value x
         """
         return self.calculate_values(x)
 
-    def calculate_values(self, x):
+    def calculate_values(self, x: Union[int, float, complex]) -> Union[int, float, complex]:
         """
         Takes a number and returns the poly evaluated at x
         """
@@ -212,46 +251,46 @@ class Polynomial(calculus.Function):
             result += coef * x ** degree 
         return result
 
-    def find_roots(self):
+    def find_roots(self) -> np.ndarray:
         """
         Returns the values where p(x) = 0.
         """
         return np.roots(self.coefficients())
 
-    def get_domain(self):
+    def get_domain(self) -> Domain:
         """
-        Returns a string with information about the coefficients of the
+        Returns a Domain class instance with information about the coefficients of the
         polynomial. Mathematically, p ∈ A[x], where A is the domain of the coefficients
         
         Possible domains are:
-        - Complex
-        - Real
-        - Integer
-        - Natural
+        - Domain.Natural
+        - Domain.Integer
+        - Domain.Real
+        - Domain.Complex
         """
-        domain = 'Complex'
+        domain = Domain.COMPLEX
         for i in self.values:
-            if isinstance(i[1], (complex)):
+            if isinstance(i[1], complex):
                 break
         else:
-            domain = 'Real'
+            domain = Domain.REAL
             for i in self.values:
                 if not float(i[1]).is_integer():
                     break
             else:
-                domain = 'Integer'
+                domain = Domain.INTEGER
                 for i in self.values:
                     if i[1] < 0:
                         break
                 else:
-                    domain = 'Natural'
+                    domain = Domain.NATURAL
         return domain
 
-    def plot_func(self, ax):
+    def plot_func(self, ax) -> None:
         y_intercept = self(0)
-        ax.scatter(0, y_intercept, color= calculus.Function.function_part['y-intercept'])
+        ax.scatter(0, y_intercept, color = calculus.Function.function_part['y-intercept'])
 
-    def __str__(self):
+    def __str__(self) -> str:
         expression = []
         #TODO algebraic expression
         for degree, coef in self.values:
@@ -264,7 +303,7 @@ class Polynomial(calculus.Function):
         expression = ' + '.join(expression)
         return expression
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self.coefficients())
 
 def polynomial_addition(p: Polynomial, q: Polynomial) -> Polynomial:
@@ -319,4 +358,4 @@ def max_degree(p: Polynomial, q: Polynomial) -> int:
     """
     Returns the max degree between two instances of Polynomial
     """
-    return _math.maximum(p.degree, q.degree)
+    return max(p.degree, q.degree)
