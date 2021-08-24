@@ -229,3 +229,87 @@ def arccotanh(x):
     pass
 
 ############################################
+
+def sinc(x):
+    return sin(x) / x
+
+############################################
+# versine an haversine related functions
+############################################
+
+def versin(x):
+    return 1 - cos(x)
+
+def coversin(x):
+    return 1 - sin(x)
+
+def vercosin(x):
+    return 1 + cos(x)
+
+def covercosin(x):
+    return 1 + sin(x)
+
+def haversin(x):
+    return versin(x) / 2
+
+def hacoversin(x):
+    return coversin(x) / 2
+
+def havercosin(x):
+    return vercosin(x) / 2
+
+def hacovercosin(x):
+    return covercosin(x) / 2
+
+############################################# 
+# Inverses of versine and haversine functions
+#############################################
+
+def arcversin(y):
+    return arccos(1 - y)
+
+def arcvercos(y):
+    return arccos(y - 1)
+
+def arccoversin(y):
+    return arcsin(1 - y)
+
+def arccovercos(y):
+    return arcsin(y - 1)
+
+def archaversin(y):
+    return arccos(1 - 2 * y)
+
+def archavercos(y):
+    return arccos(2 * y - 1)
+
+def archacoversin(y):
+    return arcsin(1 - 2 * y)
+
+def archacovercos(y):
+    return arcsin(2 * y - 1)
+
+############################################
+# Exsecant functions
+############################################
+
+def exsec(x):
+    return sec(x) - 1
+
+def excosec(x):
+    return cosec(x) - 1
+
+def excotan(x):
+    return cotan(x) - 1
+
+############################################
+# Cord and arccord functions
+############################################
+
+def crd(x):
+    return 2 * sin(x / 2)
+
+def arccrd(y):
+    return 2 * arcsin(y / 2)
+
+############################################
