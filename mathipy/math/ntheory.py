@@ -1,6 +1,6 @@
 import math
 from dataclasses import dataclass, field
-from typing import Callable, Dict, Iterable, Optional, Generator, Tuple
+from typing import Callable, Dict, Iterable, Optional, Generator, Sequence, Tuple
 from functools import cache, lru_cache
 from mathipy import numeric_operations as ops
 
@@ -320,38 +320,42 @@ def subfactorial(n: int) -> int:
         
     return (n - 1) * (subfactorial(n - 1) + subfactorial(n - 2))
 
-@ops.vectorize
-def variation(n: int, k: int, repetitions: bool = False) -> int:
-    if repetitions:
-       return n ** k
-    else:
-       return factorial(n) // factorial(n - k)
-    # if k > n: raise ValueError('k must be less than n')
-    
-    # _C_funcs.variation.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.c_bool)
-    # _C_funcs.variation.restype = ctypes.c_int
-    
-    # return _C_funcs.variation(n, k, repetitions)
-
 
 @ops.vectorize
-def permutation(n: int, k: Optional[int] = None, circular: bool = False) -> int:
-    if not k:
-        if circular: return factorial(n - 1)
-        else: return factorial(n)
-    else:
-        denominator = 1
-        for el in range(k):
-            denominator *= factorial(el)
-        return factorial(n) // denominator
+def permutation(n: int, k: int, circular: bool = False) -> int:
+    """
+    nPk, or n permute k, is equal to the number of layouts
+    given by n different elements (so order matters) arranged in groups of k length
+
+    nPk = n! / (n - k)!
+
+    If the permutation is circular, then layouts are considered equal if the order
+    of elements remain the same in spite of the position of elements not being fixed
+
+    nP'k = (n - 1)! / (n - k)!
+    """
+    if circular: 
+        return permutation(n, k) // n
+    else: 
+        return factorial(n) // factorial(n - k)
 
 
 @ops.vectorize
 def combinatorial(n: int, k: int, repetitions: bool = False) -> int:
+    """
+    nCk, or n combinations of k, is equal to the number of layouts given by
+    n equal or indistinguishable elements (so order does not matter) arranged 
+    in groups of size k
+
+    nCk = nPk / k! = n! / (k! (n - k)!)
+
+    If repetitions of elements are allowed, then the number of layouts is:
+
+    nC'k = (n + k - 1)Ck = (n + k -1)! / (k! (n - 1)!)
+    """
     if not repetitions:
-        if k >= n: raise ValueError('n must be greater than p')
-        num = factorial(n)
-        den = factorial(k) * factorial(n - k)
-        return num // den
+        if k > n: 
+            return 0
+        return permutation(n, k) // factorial(k)
     else:
-        return combinatorial(n + k - 1, k, repetitions=False)
+        return combinatorial(n + k - 1, k)
