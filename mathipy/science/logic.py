@@ -1,7 +1,7 @@
 from functools import wraps
-from typing import Annotated, Any, Iterable, Union, Callable, FrozenSet, TypeVar
+from typing import Callable, FrozenSet, TypeVar
 
-T = TypeVar('T', bound=Any)
+T = TypeVar('T')
 
 def check_bool_input(f: Callable[..., bool]) -> Callable[..., bool]:
 	"""

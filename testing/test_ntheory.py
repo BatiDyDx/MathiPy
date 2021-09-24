@@ -28,8 +28,6 @@ def test_lcm(self):
     self.assertEqual(lcm(2, 6), 6)
     self.assertEqual(lcm(8, 6), 24)
 
-def test_sci_notation(self):
-    pass
 
 def test_fibonacci(self):
     self.assertEqual(fibonacci(1), 1)

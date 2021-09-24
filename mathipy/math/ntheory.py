@@ -1,6 +1,6 @@
 import math
 from dataclasses import dataclass, field
-from typing import Callable, Dict, Iterable, Optional, Generator, Sequence, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Generator
 from functools import cache, lru_cache
 from mathipy import numeric_operations as ops
 
@@ -113,6 +113,11 @@ def geometric_prog(n: int, a, r):
     return a * (r ** (n + 1) - 1) / (r - 1)
 
 
+def AGM():
+    """Arithemtic geometric progression"""
+    pass
+
+
 def summation(f: Callable, up_bound: int, low_bound: int = 0, **kwargs) -> float:
     if up_bound < low_bound:
         return 0
@@ -143,6 +148,7 @@ def productory_over_set(f: Callable, s: Iterable, **kwargs):
     for i in s:
         result *= f(i, **kwargs)
     return result
+
 
 @lru_cache(maxsize=5)
 def pascal_triangle(n: int) -> list:
@@ -200,25 +206,6 @@ def coprimes(a: int, b: int) -> bool:
     return gcd(a, b) == 1
 
 
-def sci_notation(x: float) -> Tuple[float, int]:
-    """
-    Given a number, it returns two numbers that
-    correspond to its scientific notation, the mantissa
-    and the order of magnitude
-    i.e. 150 = 1.5 * 10 ^ 2, where the mantissa is 1.5
-    and the order of magnitude is 2.
-    """
-    # Take the order of magnitude of x, 
-    # then convert it to an int
-    order = math.log10(abs(x))
-    order = int(ops.floor(order))
-    
-    # Divide x by its order of magnitude
-    mant = x / (10 ** order)
-
-    return (mant, order)
-
-
 @cache
 def fibonacci(n: int) -> int:
     """
@@ -268,6 +255,7 @@ def index_of_fib(n: int) -> Optional[int]:
                 return seq_len
             last_fib = new_fib
             seq_len += 1
+
 
 @ops.vectorize
 @cache
@@ -319,6 +307,10 @@ def subfactorial(n: int) -> int:
         return 1
         
     return (n - 1) * (subfactorial(n - 1) + subfactorial(n - 2))
+
+
+def integer_interval(m: int, n: int) -> List[int]:
+    return list(range(m, n+1))
 
 
 @ops.vectorize

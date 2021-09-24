@@ -1,4 +1,5 @@
-from typing import Callable, Dict, TypeVar
+import math
+from typing import Callable, Dict, Tuple, TypeVar
 import numpy as np
 import matplotlib.pyplot as plt
 from mathipy import numeric_operations as ops
@@ -163,6 +164,25 @@ def mantissa(x: Real) -> float:
     0.5
     """
     return x % 1
+
+
+def sci_notation(x: float) -> Tuple[float, int]:
+    """
+    Given a number, it returns two numbers that
+    correspond to its scientific notation, the mantissa
+    and the order of magnitude
+    i.e. 150 = 1.5 * 10 ^ 2, where the mantissa is 1.5
+    and the order of magnitude is 2.
+    """
+    # Take the order of magnitude of x, 
+    # then convert it to an int
+    order = math.log10(abs(x))
+    order = int(ops.floor(order))
+    
+    # Divide x by its order of magnitude
+    mant = x / (10 ** order)
+
+    return (mant, order)
 
 
 @ops.vectorize
